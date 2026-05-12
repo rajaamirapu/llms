@@ -2642,7 +2642,672 @@
   </aside>
 </section>
 
-<!-- ============== SLIDE 34: PUTTING IT ALL TOGETHER ============== -->
+<!-- ============== SLIDE 34: TEXT-TO-IMAGE OVERVIEW ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #2e0f1a 100%)">
+  <h2>Text-to-Image Generation</h2>
+  <p>How does a model turn <code>"a cat astronaut on the moon"</code> into a photorealistic image?</p>
+  <div class="two-col">
+    <div>
+      <div class="highlight-box">
+        <p><strong>Core Idea:</strong> Start with pure random noise, then <em>gradually remove</em> the noise, guided by a text description, until a coherent image emerges.</p>
+      </div>
+      <div style="margin-top:15px;">
+        <p style="font-size:0.8em; color:#ccc;"><strong style="color:#FF6584;">Key models:</strong></p>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-top:8px;">
+          <div class="card" style="padding:12px;">
+            <h4 style="font-size:0.85em;">DALL-E 3</h4>
+            <p style="font-size:0.65em;">OpenAI &bull; Diffusion + Transformer</p>
+          </div>
+          <div class="card" style="padding:12px;">
+            <h4 style="font-size:0.85em;">Stable Diffusion</h4>
+            <p style="font-size:0.65em;">Stability AI &bull; Open-source</p>
+          </div>
+          <div class="card" style="padding:12px;">
+            <h4 style="font-size:0.85em;">Midjourney</h4>
+            <p style="font-size:0.65em;">Midjourney Inc &bull; Artistic style</p>
+          </div>
+          <div class="card" style="padding:12px;">
+            <h4 style="font-size:0.85em;">Imagen</h4>
+            <p style="font-size:0.65em;">Google &bull; T5 text encoder</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="viz-container">
+        <svg viewBox="0 0 380 310" xmlns="http://www.w3.org/2000/svg">
+          <!-- Text prompt -->
+          <rect x="20" y="10" width="340" height="40" rx="10" fill="rgba(108,99,255,0.15)" stroke="#6C63FF" stroke-width="1.5"/>
+          <text x="190" y="35" text-anchor="middle" fill="#6C63FF" font-size="12" font-weight="600">"a cat astronaut on the moon"</text>
+          
+          <text x="190" y="65" text-anchor="middle" fill="#888" font-size="12">&darr;</text>
+          
+          <!-- Noise to image progression -->
+          <!-- Step 1: Pure noise -->
+          <rect x="20" y="75" width="70" height="70" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+          <!-- Noise dots -->
+          <circle cx="35" cy="90" r="2" fill="#666"/><circle cx="50" cy="85" r="1.5" fill="#888"/><circle cx="65" cy="95" r="2" fill="#555"/>
+          <circle cx="40" cy="105" r="1.5" fill="#777"/><circle cx="55" cy="100" r="2" fill="#666"/><circle cx="70" cy="110" r="1.5" fill="#888"/>
+          <circle cx="45" cy="115" r="2" fill="#555"/><circle cx="60" cy="120" r="1.5" fill="#777"/><circle cx="75" cy="90" r="2" fill="#666"/>
+          <circle cx="30" cy="125" r="1.5" fill="#888"/><circle cx="50" cy="130" r="2" fill="#555"/><circle cx="70" cy="125" r="1.5" fill="#777"/>
+          <text x="55" y="160" text-anchor="middle" fill="#888" font-size="8">T=1000</text>
+          <text x="55" y="172" text-anchor="middle" fill="#666" font-size="7">Pure noise</text>
+          
+          <text x="103" y="112" fill="#FFD93D" font-size="14">&rarr;</text>
+          
+          <!-- Step 2: Noisy shape -->
+          <rect x="115" y="75" width="70" height="70" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+          <ellipse cx="150" cy="105" rx="22" ry="18" fill="rgba(108,99,255,0.15)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+          <circle cx="140" cy="90" r="2" fill="#666"/><circle cx="160" cy="85" r="1.5" fill="#888"/>
+          <circle cx="135" cy="120" r="1.5" fill="#777"/><circle cx="165" cy="115" r="2" fill="#666"/>
+          <text x="150" y="160" text-anchor="middle" fill="#888" font-size="8">T=700</text>
+          <text x="150" y="172" text-anchor="middle" fill="#666" font-size="7">Shapes emerge</text>
+          
+          <text x="198" y="112" fill="#FFD93D" font-size="14">&rarr;</text>
+          
+          <!-- Step 3: Rough form -->
+          <rect x="210" y="75" width="70" height="70" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+          <ellipse cx="245" cy="100" rx="20" ry="16" fill="rgba(108,99,255,0.2)" stroke="rgba(108,99,255,0.3)" stroke-width="1"/>
+          <circle cx="238" cy="95" r="3" fill="rgba(67,233,123,0.4)"/>
+          <circle cx="252" cy="95" r="3" fill="rgba(67,233,123,0.4)"/>
+          <ellipse cx="245" cy="120" rx="12" ry="8" fill="rgba(255,217,61,0.15)"/>
+          <text x="245" y="160" text-anchor="middle" fill="#888" font-size="8">T=300</text>
+          <text x="245" y="172" text-anchor="middle" fill="#666" font-size="7">Details form</text>
+          
+          <text x="293" y="112" fill="#FFD93D" font-size="14">&rarr;</text>
+          
+          <!-- Step 4: Final image -->
+          <rect x="305" y="75" width="70" height="70" rx="8" fill="rgba(67,233,123,0.05)" stroke="#43E97B" stroke-width="1.5"/>
+          <ellipse cx="340" cy="98" rx="18" ry="15" fill="rgba(108,99,255,0.3)" stroke="#6C63FF" stroke-width="1"/>
+          <circle cx="333" cy="93" r="3" fill="#43E97B"/>
+          <circle cx="347" cy="93" r="3" fill="#43E97B"/>
+          <path d="M335,100 Q340,104 345,100" fill="none" stroke="#FF6584" stroke-width="1"/>
+          <line x1="332" y1="85" x2="330" y2="78" stroke="#FFD93D" stroke-width="1.5"/>
+          <line x1="348" y1="85" x2="350" y2="78" stroke="#FFD93D" stroke-width="1.5"/>
+          <ellipse cx="340" cy="118" rx="14" ry="10" fill="rgba(255,255,255,0.08)"/>
+          <circle cx="340" cy="135" r="8" fill="rgba(255,217,61,0.2)" stroke="#FFD93D" stroke-width="0.5"/>
+          <text x="340" y="160" text-anchor="middle" fill="#43E97B" font-size="8">T=0</text>
+          <text x="340" y="172" text-anchor="middle" fill="#43E97B" font-size="7">Final image!</text>
+          
+          <!-- Bottom summary -->
+          <rect x="20" y="190" width="340" height="110" rx="12" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+          <text x="190" y="215" text-anchor="middle" fill="#FFD93D" font-size="11" font-weight="700">The Denoising Process</text>
+          <text x="190" y="235" text-anchor="middle" fill="#ccc" font-size="10">Start: 100% noise, 0% signal</text>
+          <text x="190" y="255" text-anchor="middle" fill="#ccc" font-size="10">Each step: model predicts &amp; removes a bit of noise</text>
+          <text x="190" y="275" text-anchor="middle" fill="#ccc" font-size="10">End: 0% noise, 100% image</text>
+          <text x="190" y="293" text-anchor="middle" fill="#888" font-size="9">Typically 20-50 denoising steps</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    Text-to-image generation is one of the most mind-blowing applications of generative AI. You type a sentence and get a photorealistic image.
+    The core idea is counterintuitive: we start with PURE RANDOM NOISE — just static, like a TV with no signal.
+    Then, guided by the text prompt, the model gradually removes noise step by step. After 20-50 steps, a coherent image emerges.
+    It's like sculpting — you start with a block of marble (noise) and chip away until a statue (image) appears.
+    The major models: DALL-E 3 by OpenAI combines diffusion with transformers. Stable Diffusion by Stability AI is open-source — you can run it on your own GPU.
+    Midjourney excels at artistic, stylized images. Google's Imagen uses a T5 text encoder for superior text understanding.
+    The visualization on the right shows the progression: at T=1000, pure noise. At T=700, rough shapes emerge. At T=300, details form. At T=0, the final image.
+    This is called the "reverse diffusion process" — and understanding how it works requires understanding CLIP, U-Net, and the VAE, which we'll cover next.
+  </aside>
+</section>
+
+<!-- ============== SLIDE 35: DIFFUSION PROCESS ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #2e0f1a 100%)">
+  <h2>How Diffusion Models Work</h2>
+  <p>Training involves two processes: adding noise (<strong style="color:#FF6584">forward</strong>) and removing noise (<strong style="color:#43E97B">reverse</strong>).</p>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 310" xmlns="http://www.w3.org/2000/svg">
+      <!-- Forward Process -->
+      <rect x="10" y="10" width="800" height="130" rx="14" fill="rgba(255,101,132,0.05)" stroke="rgba(255,101,132,0.2)" stroke-width="1"/>
+      <text x="400" y="35" text-anchor="middle" fill="#FF6584" font-size="13" font-weight="700">Forward Process (Training) &mdash; Gradually Add Gaussian Noise</text>
+      
+      <!-- Clean image -->
+      <rect x="30" y="50" width="65" height="65" rx="8" fill="rgba(67,233,123,0.15)" stroke="#43E97B" stroke-width="1"/>
+      <text x="62" y="75" text-anchor="middle" fill="#43E97B" font-size="9" font-weight="600">x&#x2080;</text>
+      <text x="62" y="90" text-anchor="middle" fill="#888" font-size="7">Clean image</text>
+      <text x="62" y="128" text-anchor="middle" fill="#43E97B" font-size="8">noise: 0%</text>
+      
+      <text x="108" y="85" fill="#FF6584" font-size="12">&rarr; +&epsilon;</text>
+      
+      <!-- Step 1 -->
+      <rect x="135" y="50" width="65" height="65" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="167" y="75" text-anchor="middle" fill="#ccc" font-size="9">x&#x2081;</text>
+      <circle cx="150" cy="90" r="2" fill="#666" opacity="0.5"/><circle cx="165" cy="85" r="1.5" fill="#777" opacity="0.5"/>
+      <text x="167" y="128" text-anchor="middle" fill="#888" font-size="8">noise: 5%</text>
+      
+      <text x="213" y="85" fill="#FF6584" font-size="12">&rarr; +&epsilon;</text>
+      
+      <!-- Step 2 -->
+      <rect x="240" y="50" width="65" height="65" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="272" y="75" text-anchor="middle" fill="#ccc" font-size="9">x&#x2082;</text>
+      <circle cx="255" cy="85" r="2" fill="#777"/><circle cx="270" cy="90" r="2" fill="#666"/>
+      <circle cx="260" cy="100" r="1.5" fill="#888"/><circle cx="280" cy="88" r="2" fill="#555"/>
+      <text x="272" y="128" text-anchor="middle" fill="#888" font-size="8">noise: 15%</text>
+      
+      <text x="323" y="85" fill="#FF6584" font-size="12">&hellip;</text>
+      
+      <!-- Step t -->
+      <rect x="355" y="50" width="65" height="65" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="387" y="75" text-anchor="middle" fill="#ccc" font-size="9">x&#x209C;</text>
+      <circle cx="365" cy="85" r="2" fill="#888"/><circle cx="380" cy="80" r="2" fill="#666"/><circle cx="395" cy="90" r="2" fill="#777"/>
+      <circle cx="370" cy="95" r="1.5" fill="#555"/><circle cx="385" cy="100" r="2" fill="#888"/><circle cx="400" cy="85" r="1.5" fill="#666"/>
+      <text x="387" y="128" text-anchor="middle" fill="#888" font-size="8">noise: 50%</text>
+      
+      <text x="438" y="85" fill="#FF6584" font-size="12">&hellip;</text>
+      
+      <!-- Step T -->
+      <rect x="465" y="50" width="65" height="65" rx="8" fill="rgba(255,101,132,0.1)" stroke="#FF6584" stroke-width="1"/>
+      <text x="497" y="75" text-anchor="middle" fill="#FF6584" font-size="9" font-weight="600">x&#x1D40;</text>
+      <!-- Dense noise -->
+      <circle cx="475" cy="82" r="2" fill="#888"/><circle cx="485" cy="78" r="2" fill="#666"/><circle cx="495" cy="85" r="2" fill="#777"/>
+      <circle cx="505" cy="80" r="1.5" fill="#555"/><circle cx="515" cy="88" r="2" fill="#888"/>
+      <circle cx="478" cy="95" r="1.5" fill="#666"/><circle cx="490" cy="92" r="2" fill="#777"/><circle cx="502" cy="98" r="2" fill="#555"/>
+      <circle cx="512" cy="95" r="1.5" fill="#888"/><circle cx="480" cy="105" r="2" fill="#666"/>
+      <circle cx="495" cy="102" r="1.5" fill="#777"/><circle cx="510" cy="105" r="2" fill="#555"/>
+      <text x="497" y="128" text-anchor="middle" fill="#FF6584" font-size="8">noise: 100%</text>
+      
+      <!-- Formula -->
+      <text x="650" y="75" text-anchor="middle" fill="#ccc" font-size="10" font-family="'Fira Code', monospace">q(x&#x209C;|x&#x209C;&#x208B;&#x2081;) = N(x&#x209C;; &radic;(1-&beta;&#x209C;)x&#x209C;&#x208B;&#x2081;, &beta;&#x209C;I)</text>
+      <text x="650" y="95" text-anchor="middle" fill="#888" font-size="9">&beta;&#x209C; = noise schedule (linear or cosine)</text>
+      <text x="650" y="115" text-anchor="middle" fill="#888" font-size="9">Gradually mixes image with Gaussian noise</text>
+      
+      <!-- REVERSE Process -->
+      <rect x="10" y="155" width="800" height="145" rx="14" fill="rgba(67,233,123,0.05)" stroke="rgba(67,233,123,0.2)" stroke-width="1"/>
+      <text x="400" y="180" text-anchor="middle" fill="#43E97B" font-size="13" font-weight="700">Reverse Process (Generation) &mdash; Neural Network Removes Noise</text>
+      
+      <!-- Pure noise -->
+      <rect x="30" y="195" width="65" height="65" rx="8" fill="rgba(255,101,132,0.1)" stroke="#FF6584" stroke-width="1"/>
+      <text x="62" y="215" text-anchor="middle" fill="#FF6584" font-size="9">x&#x1D40;</text>
+      <circle cx="42" cy="225" r="2" fill="#888"/><circle cx="55" cy="220" r="2" fill="#666"/><circle cx="68" cy="230" r="2" fill="#777"/>
+      <circle cx="48" cy="240" r="1.5" fill="#555"/><circle cx="60" cy="235" r="2" fill="#888"/><circle cx="75" cy="225" r="1.5" fill="#666"/>
+      <text x="62" y="274" text-anchor="middle" fill="#FF6584" font-size="8">Random noise</text>
+      
+      <text x="108" y="230" fill="#43E97B" font-size="12">&rarr; -&epsilon;</text>
+      
+      <!-- U-Net block -->
+      <rect x="135" y="200" width="90" height="50" rx="8" fill="rgba(108,99,255,0.15)" stroke="#6C63FF" stroke-width="1.5"/>
+      <text x="180" y="222" text-anchor="middle" fill="#6C63FF" font-size="10" font-weight="600">U-Net</text>
+      <text x="180" y="237" text-anchor="middle" fill="#888" font-size="8">predicts noise &epsilon;</text>
+      
+      <!-- Text conditioning arrow -->
+      <rect x="145" y="260" width="70" height="20" rx="5" fill="rgba(255,217,61,0.15)" stroke="#FFD93D" stroke-width="1"/>
+      <text x="180" y="274" text-anchor="middle" fill="#FFD93D" font-size="7" font-weight="600">text embedding</text>
+      <line x1="180" y1="260" x2="180" y2="252" stroke="#FFD93D" stroke-width="1" marker-end="url(#arrowUp)"/>
+      
+      <text x="238" y="230" fill="#43E97B" font-size="12">&rarr;</text>
+      
+      <!-- Subtract noise -->
+      <rect x="255" y="200" width="80" height="50" rx="8" fill="rgba(255,101,132,0.1)" stroke="#FF6584" stroke-width="1"/>
+      <text x="295" y="220" text-anchor="middle" fill="#FF6584" font-size="9">x&#x209C; - &epsilon;&#x2091;</text>
+      <text x="295" y="237" text-anchor="middle" fill="#888" font-size="8">subtract predicted noise</text>
+      
+      <text x="348" y="230" fill="#43E97B" font-size="12">&rarr;</text>
+      
+      <!-- Repeat -->
+      <text x="400" y="225" text-anchor="middle" fill="#FFD93D" font-size="11" font-weight="600">Repeat T times</text>
+      <text x="400" y="242" text-anchor="middle" fill="#888" font-size="9">(20-50 steps typical)</text>
+      
+      <text x="458" y="230" fill="#43E97B" font-size="12">&rarr;</text>
+      
+      <!-- Final image -->
+      <rect x="475" y="195" width="65" height="65" rx="8" fill="rgba(67,233,123,0.1)" stroke="#43E97B" stroke-width="1.5"/>
+      <text x="507" y="218" text-anchor="middle" fill="#43E97B" font-size="9" font-weight="600">x&#x2080;</text>
+      <text x="507" y="235" text-anchor="middle" fill="#43E97B" font-size="8">Generated</text>
+      <text x="507" y="248" text-anchor="middle" fill="#43E97B" font-size="8">image!</text>
+      
+      <!-- Key formula -->
+      <rect x="560" y="195" width="240" height="85" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="680" y="215" text-anchor="middle" fill="#FFD93D" font-size="10" font-weight="600">Training Objective</text>
+      <text x="680" y="238" text-anchor="middle" fill="#ccc" font-size="10" font-family="'Fira Code', monospace">L = E[||&epsilon; - &epsilon;&#x2091;(x&#x209C;, t, c)||&sup2;]</text>
+      <text x="680" y="258" text-anchor="middle" fill="#888" font-size="9">&epsilon; = true noise, &epsilon;&#x2091; = predicted noise</text>
+      <text x="680" y="273" text-anchor="middle" fill="#888" font-size="9">c = text conditioning (CLIP embedding)</text>
+    </svg>
+  </div>
+  <aside class="notes">
+    Diffusion models have TWO processes — understanding both is key.
+    FORWARD PROCESS (training only): Take a clean image and gradually add Gaussian noise over T timesteps (typically T=1000).
+    At step 1, add a tiny bit of noise — the image is still recognizable. At step 500, it's half noise. At step T=1000, it's pure random noise.
+    The noise schedule beta_t controls how much noise is added at each step. Linear and cosine schedules are common.
+    The math is simple: multiply the image by a shrinkage factor and add scaled Gaussian noise.
+    REVERSE PROCESS (generation): This is where the magic happens. Start with pure random noise.
+    A neural network (U-Net) is trained to predict HOW MUCH noise is in the image at each timestep.
+    Given noisy image x_t and timestep t, the U-Net predicts epsilon — the noise component.
+    We subtract the predicted noise to get a slightly cleaner image. Repeat this T times.
+    The crucial addition: TEXT CONDITIONING. The text prompt is encoded by CLIP into an embedding vector.
+    This embedding is injected into the U-Net via cross-attention, guiding the denoising toward the described image.
+    The training loss is beautifully simple: minimize the difference between the true noise added and the noise predicted by the U-Net.
+    That's it — the entire training objective is just mean squared error on noise prediction.
+  </aside>
+</section>
+
+<!-- ============== SLIDE 36: CLIP TEXT-IMAGE CONNECTION ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #2e0f1a 100%)">
+  <h2>CLIP &mdash; Connecting Text and Images</h2>
+  <p>CLIP (Contrastive Language-Image Pre-training) is the <strong style="color:#6C63FF">bridge</strong> between text prompts and image generation.</p>
+  <div class="two-col">
+    <div>
+      <div class="highlight-box">
+        <p><strong>What CLIP does:</strong> Maps both text and images into the SAME embedding space. Matching pairs are close, non-matching pairs are far.</p>
+      </div>
+      <div class="code-block" style="margin-top:12px; font-size:0.6em;">
+        <span class="comment"># CLIP encodes BOTH modalities:</span><br>
+        text_embed = <span class="func">clip.encode_text</span>(<br>
+        &nbsp;&nbsp;<span class="string">"a cat astronaut"</span>)<br>
+        <span class="comment"># &rarr; [0.12, -0.45, 0.78, ...] (512d)</span><br><br>
+        img_embed = <span class="func">clip.encode_image</span>(<br>
+        &nbsp;&nbsp;cat_astronaut_photo)<br>
+        <span class="comment"># &rarr; [0.11, -0.43, 0.80, ...] (512d)</span><br><br>
+        <span class="func">cosine_similarity</span>(text, img) = <span class="string">0.95</span><br>
+        <span class="comment"># They're close! CLIP learned the link.</span>
+      </div>
+      <p style="font-size:0.7em; color:#888; margin-top:10px;">Trained on 400M image-text pairs from the internet. Learns visual concepts from natural language descriptions.</p>
+    </div>
+    <div>
+      <div class="viz-container">
+        <svg viewBox="0 0 380 310" xmlns="http://www.w3.org/2000/svg">
+          <!-- Text encoder -->
+          <rect x="20" y="10" width="150" height="120" rx="12" fill="rgba(108,99,255,0.08)" stroke="#6C63FF" stroke-width="1.5"/>
+          <text x="95" y="35" text-anchor="middle" fill="#6C63FF" font-size="11" font-weight="700">Text Encoder</text>
+          <text x="95" y="55" text-anchor="middle" fill="#888" font-size="9">(Transformer)</text>
+          <rect x="35" y="65" width="120" height="22" rx="5" fill="rgba(108,99,255,0.15)"/>
+          <text x="95" y="80" text-anchor="middle" fill="#ccc" font-size="8">"a photo of a cat"</text>
+          <text x="95" y="105" text-anchor="middle" fill="#888" font-size="9">&darr;</text>
+          <text x="95" y="120" text-anchor="middle" fill="#6C63FF" font-size="9" font-family="'Fira Code', monospace">[0.12, -0.45, ...]</text>
+          
+          <!-- Image encoder -->
+          <rect x="210" y="10" width="150" height="120" rx="12" fill="rgba(255,101,132,0.08)" stroke="#FF6584" stroke-width="1.5"/>
+          <text x="285" y="35" text-anchor="middle" fill="#FF6584" font-size="11" font-weight="700">Image Encoder</text>
+          <text x="285" y="55" text-anchor="middle" fill="#888" font-size="9">(ViT / ResNet)</text>
+          <rect x="245" y="65" width="80" height="22" rx="5" fill="rgba(255,101,132,0.15)"/>
+          <text x="285" y="80" text-anchor="middle" fill="#ccc" font-size="8">[cat photo]</text>
+          <text x="285" y="105" text-anchor="middle" fill="#888" font-size="9">&darr;</text>
+          <text x="285" y="120" text-anchor="middle" fill="#FF6584" font-size="9" font-family="'Fira Code', monospace">[0.11, -0.43, ...]</text>
+          
+          <!-- Shared space -->
+          <rect x="20" y="150" width="340" height="150" rx="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="190" y="172" text-anchor="middle" fill="#FFD93D" font-size="11" font-weight="700">Shared Embedding Space</text>
+          
+          <!-- Matching pair (close) -->
+          <circle cx="120" cy="220" r="8" fill="#6C63FF"/>
+          <text x="120" y="245" text-anchor="middle" fill="#6C63FF" font-size="8">"cat photo"</text>
+          <circle cx="145" cy="215" r="8" fill="#FF6584"/>
+          <text x="145" y="240" text-anchor="middle" fill="#FF6584" font-size="8">[cat img]</text>
+          <line x1="128" y1="220" x2="137" y2="215" stroke="#43E97B" stroke-width="2"/>
+          <text x="132" y="207" text-anchor="middle" fill="#43E97B" font-size="7" font-weight="600">close!</text>
+          
+          <!-- Non-matching pair (far) -->
+          <circle cx="280" cy="210" r="8" fill="#6C63FF"/>
+          <text x="280" y="235" text-anchor="middle" fill="#6C63FF" font-size="8">"a car"</text>
+          <circle cx="145" cy="215" r="0" fill="none"/>
+          <line x1="145" y1="215" x2="272" y2="210" stroke="#FF6584" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+          <text x="210" y="200" fill="#FF6584" font-size="7">far apart</text>
+          
+          <!-- Contrastive learning -->
+          <text x="190" y="280" text-anchor="middle" fill="#888" font-size="9">Contrastive learning: pull matches close,</text>
+          <text x="190" y="293" text-anchor="middle" fill="#888" font-size="9">push non-matches apart</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    CLIP is the secret ingredient that connects language to images. Developed by OpenAI, it was trained on 400 million image-text pairs from the internet.
+    It has TWO encoders: a Text Encoder (a Transformer, similar to GPT) and an Image Encoder (a Vision Transformer or ResNet).
+    Both encoders map their inputs into the SAME 512-dimensional embedding space.
+    The training is contrastive: given a batch of image-text pairs, CLIP learns to maximize similarity for matching pairs (a cat photo with the text "a photo of a cat") and minimize similarity for non-matching pairs (a cat photo with "a car").
+    After training, CLIP can score how well ANY text matches ANY image — without being specifically trained on that combination.
+    In text-to-image generation, CLIP plays a critical role: the text prompt is encoded by CLIP's text encoder into an embedding vector.
+    This vector is fed into the U-Net's cross-attention layers, telling the denoising network WHAT image to generate.
+    Without CLIP, the model wouldn't know what "cat astronaut" looks like — it's the bridge between language understanding and image generation.
+    CLIP is also used for image search, zero-shot classification, and as a quality metric for generated images.
+  </aside>
+</section>
+
+<!-- ============== SLIDE 37: STABLE DIFFUSION ARCHITECTURE ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #2e0f1a 100%)">
+  <h2>Stable Diffusion &mdash; Full Architecture</h2>
+  <p>Latent Diffusion: perform denoising in a <strong style="color:#43E97B">compressed latent space</strong> instead of pixel space &mdash; 64x faster!</p>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 320" xmlns="http://www.w3.org/2000/svg">
+      <!-- Text Prompt -->
+      <rect x="10" y="10" width="170" height="120" rx="14" fill="rgba(108,99,255,0.08)" stroke="#6C63FF" stroke-width="1.5"/>
+      <text x="95" y="35" text-anchor="middle" fill="#6C63FF" font-size="12" font-weight="700">Text Encoder</text>
+      <text x="95" y="50" text-anchor="middle" fill="#888" font-size="9">(CLIP ViT-L/14)</text>
+      <rect x="25" y="60" width="150" height="25" rx="6" fill="rgba(108,99,255,0.15)"/>
+      <text x="100" y="77" text-anchor="middle" fill="#ccc" font-size="9">"a cat in a spacesuit"</text>
+      <text x="95" y="105" text-anchor="middle" fill="#6C63FF" font-size="9" font-weight="600">77 &times; 768 tokens</text>
+      <text x="95" y="118" text-anchor="middle" fill="#888" font-size="8">text embeddings</text>
+      
+      <!-- Arrow to U-Net -->
+      <path d="M180,70 Q210,70 230,120" fill="none" stroke="#6C63FF" stroke-width="1.5" stroke-dasharray="4 3" class="flow-line"/>
+      <text x="215" y="85" fill="#6C63FF" font-size="8">cross-attn</text>
+      
+      <!-- Noise input -->
+      <rect x="220" y="10" width="100" height="55" rx="10" fill="rgba(255,101,132,0.1)" stroke="#FF6584" stroke-width="1"/>
+      <text x="270" y="30" text-anchor="middle" fill="#FF6584" font-size="10" font-weight="600">Random Noise</text>
+      <text x="270" y="48" text-anchor="middle" fill="#888" font-size="9">z&#x1D40; &sim; N(0, I)</text>
+      <text x="270" y="58" text-anchor="middle" fill="#888" font-size="7">64&times;64&times;4 latent</text>
+      
+      <!-- Arrow down -->
+      <line x1="270" y1="67" x2="270" y2="90" stroke="#888" stroke-width="1.5" marker-end="url(#arrowUp)" transform="rotate(180,270,78.5)"/>
+      
+      <!-- U-Net (center, large) -->
+      <rect x="195" y="95" width="270" height="145" rx="16" fill="rgba(255,217,61,0.06)" stroke="#FFD93D" stroke-width="2"/>
+      <text x="330" y="118" text-anchor="middle" fill="#FFD93D" font-size="14" font-weight="700">U-Net (Noise Predictor)</text>
+      
+      <!-- U-Net internals -->
+      <!-- Encoder side -->
+      <rect x="210" y="130" width="60" height="25" rx="5" fill="rgba(108,99,255,0.15)"/><text x="240" y="147" text-anchor="middle" fill="#ccc" font-size="7">Down 64&rarr;32</text>
+      <rect x="210" y="160" width="60" height="25" rx="5" fill="rgba(108,99,255,0.2)"/><text x="240" y="177" text-anchor="middle" fill="#ccc" font-size="7">Down 32&rarr;16</text>
+      <rect x="210" y="190" width="60" height="25" rx="5" fill="rgba(108,99,255,0.25)"/><text x="240" y="207" text-anchor="middle" fill="#ccc" font-size="7">Down 16&rarr;8</text>
+      
+      <!-- Bottleneck -->
+      <rect x="285" y="190" width="80" height="25" rx="5" fill="rgba(255,101,132,0.2)" stroke="#FF6584" stroke-width="1"/><text x="325" y="207" text-anchor="middle" fill="#FF6584" font-size="7">Bottleneck 8&times;8</text>
+      
+      <!-- Decoder side -->
+      <rect x="380" y="190" width="60" height="25" rx="5" fill="rgba(67,233,123,0.15)"/><text x="410" y="207" text-anchor="middle" fill="#ccc" font-size="7">Up 8&rarr;16</text>
+      <rect x="380" y="160" width="60" height="25" rx="5" fill="rgba(67,233,123,0.12)"/><text x="410" y="177" text-anchor="middle" fill="#ccc" font-size="7">Up 16&rarr;32</text>
+      <rect x="380" y="130" width="60" height="25" rx="5" fill="rgba(67,233,123,0.1)"/><text x="410" y="147" text-anchor="middle" fill="#ccc" font-size="7">Up 32&rarr;64</text>
+      
+      <!-- Skip connections -->
+      <line x1="270" y1="142" x2="380" y2="142" stroke="#FFD93D" stroke-width="1" stroke-dasharray="3 2" opacity="0.4"/>
+      <line x1="270" y1="172" x2="380" y2="172" stroke="#FFD93D" stroke-width="1" stroke-dasharray="3 2" opacity="0.4"/>
+      <line x1="270" y1="202" x2="285" y2="202" stroke="#FFD93D" stroke-width="1" stroke-dasharray="3 2" opacity="0.4"/>
+      <text x="325" y="228" text-anchor="middle" fill="#888" font-size="7">+ Cross-Attention at each layer</text>
+      
+      <!-- Timestep -->
+      <rect x="315" y="128" width="55" height="20" rx="5" fill="rgba(255,255,255,0.05)" stroke="#888" stroke-width="0.5"/>
+      <text x="342" y="142" text-anchor="middle" fill="#888" font-size="7">t = timestep</text>
+      
+      <!-- Arrow from U-Net output -->
+      <line x1="465" y1="170" x2="495" y2="170" stroke="#888" stroke-width="1.5" marker-end="url(#arrowR)"/>
+      
+      <!-- Scheduler -->
+      <rect x="500" y="95" width="110" height="145" rx="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="555" y="118" text-anchor="middle" fill="#ccc" font-size="10" font-weight="600">Scheduler</text>
+      <text x="555" y="140" text-anchor="middle" fill="#888" font-size="8">DDPM / DDIM /</text>
+      <text x="555" y="153" text-anchor="middle" fill="#888" font-size="8">Euler / DPM++</text>
+      <rect x="515" y="165" width="80" height="20" rx="5" fill="rgba(67,233,123,0.1)"/>
+      <text x="555" y="179" text-anchor="middle" fill="#43E97B" font-size="8">x&#x209C; &rarr; x&#x209C;&#x208B;&#x2081;</text>
+      <text x="555" y="205" text-anchor="middle" fill="#888" font-size="8">Subtract noise</text>
+      <text x="555" y="218" text-anchor="middle" fill="#888" font-size="8">with schedule</text>
+      
+      <!-- Loop back -->
+      <path d="M555,242 Q555,260 330,260 Q270,260 270,242" fill="none" stroke="#FFD93D" stroke-width="1.5" stroke-dasharray="5 3" class="flow-line"/>
+      <text x="400" y="278" text-anchor="middle" fill="#FFD93D" font-size="9" font-weight="600">Repeat 20-50 steps</text>
+      
+      <!-- Arrow to VAE -->
+      <line x1="555" y1="242" x2="555" y2="242" stroke="none"/>
+      <line x1="613" y1="170" x2="643" y2="170" stroke="#888" stroke-width="1.5" marker-end="url(#arrowR)"/>
+      
+      <!-- VAE Decoder -->
+      <rect x="648" y="95" width="160" height="145" rx="14" fill="rgba(67,233,123,0.08)" stroke="#43E97B" stroke-width="1.5"/>
+      <text x="728" y="120" text-anchor="middle" fill="#43E97B" font-size="12" font-weight="700">VAE Decoder</text>
+      <text x="728" y="138" text-anchor="middle" fill="#888" font-size="9">Latent &rarr; Pixel Space</text>
+      <text x="728" y="158" text-anchor="middle" fill="#ccc" font-size="9">64&times;64&times;4</text>
+      <text x="728" y="172" text-anchor="middle" fill="#888" font-size="12">&darr;</text>
+      <text x="728" y="190" text-anchor="middle" fill="#43E97B" font-size="10" font-weight="600">512&times;512&times;3</text>
+      <text x="728" y="208" text-anchor="middle" fill="#43E97B" font-size="9">Final Image!</text>
+      <text x="728" y="228" text-anchor="middle" fill="#888" font-size="8">8&times; upscale from latent</text>
+      
+      <!-- Key insight box -->
+      <rect x="10" y="290" width="800" height="25" rx="8" fill="rgba(255,217,61,0.08)" stroke="rgba(255,217,61,0.2)" stroke-width="1"/>
+      <text x="400" y="307" text-anchor="middle" fill="#FFD93D" font-size="10" font-weight="600">Key Insight: Denoising in 64&times;64 latent space instead of 512&times;512 pixel space = 64&times; less computation!</text>
+    </svg>
+  </div>
+  <aside class="notes">
+    This is the complete Stable Diffusion architecture — let's trace the full pipeline.
+    Starting top-left: The text prompt "a cat in a spacesuit" is encoded by CLIP's text encoder into a sequence of 77 token embeddings, each 768-dimensional.
+    These embeddings are injected into the U-Net via CROSS-ATTENTION at every layer — this is how the text guides image generation.
+    The noise input is a random latent vector — 64x64 with 4 channels. This is NOT pixel space — it's a compressed representation.
+    The U-Net is the core of the model. It has an encoder path (downsampling: 64→32→16→8), a bottleneck (8x8), and a decoder path (upsampling: 8→16→32→64).
+    Skip connections (dashed lines) pass features from encoder to decoder at matching resolutions — preserving fine details.
+    At each layer, there's also cross-attention with the text embeddings and a timestep embedding telling the model what noise level to expect.
+    The U-Net outputs a noise prediction. The Scheduler (DDPM, DDIM, Euler, DPM++) determines how to subtract this noise and step to the next timestep.
+    Different schedulers trade off speed vs quality — DDIM can do it in 20 steps, DPM++ in as few as 15.
+    This loops 20-50 times until we reach a clean latent. Finally, the VAE Decoder upscales the 64x64x4 latent to a 512x512x3 pixel image.
+    The KEY INSIGHT: doing all denoising in latent space (64x64) instead of pixel space (512x512) makes it 64 times faster!
+    This is why it's called "Latent Diffusion" and why Stable Diffusion can run on consumer GPUs.
+  </aside>
+</section>
+
+<!-- ============== SLIDE 38: CLASSIFIER-FREE GUIDANCE ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #2e0f1a 100%)">
+  <h2>Classifier-Free Guidance &amp; Sampling</h2>
+  <p>How to control the <strong style="color:#FFD93D">creativity vs faithfulness</strong> tradeoff in image generation.</p>
+  <div class="two-col">
+    <div>
+      <h3 style="color:#FFD93D; font-size:1em;">CFG Scale (Guidance Scale)</h3>
+      <div class="highlight-box">
+        <p><strong>Formula:</strong><br>
+        &epsilon;_guided = &epsilon;_uncond + <strong>w</strong> &times; (&epsilon;_cond - &epsilon;_uncond)<br><br>
+        The model runs TWICE per step:<br>
+        1. With text prompt (conditional)<br>
+        2. Without text (unconditional)<br>
+        Then amplifies the difference by factor <strong>w</strong></p>
+      </div>
+      <div class="viz-container" style="margin-top:12px;">
+        <svg viewBox="0 0 380 130" xmlns="http://www.w3.org/2000/svg">
+          <!-- Scale comparison -->
+          <rect x="5" y="5" width="115" height="120" rx="10" fill="rgba(108,99,255,0.06)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+          <text x="62" y="25" text-anchor="middle" fill="#6C63FF" font-size="10" font-weight="600">w = 1</text>
+          <text x="62" y="45" text-anchor="middle" fill="#888" font-size="8">Low guidance</text>
+          <text x="62" y="70" text-anchor="middle" fill="#ccc" font-size="9">Creative, diverse</text>
+          <text x="62" y="85" text-anchor="middle" fill="#ccc" font-size="9">May ignore prompt</text>
+          <text x="62" y="110" text-anchor="middle" fill="#FF6584" font-size="8">Less faithful</text>
+          
+          <rect x="130" y="5" width="120" height="120" rx="10" fill="rgba(67,233,123,0.06)" stroke="rgba(67,233,123,0.3)" stroke-width="2"/>
+          <text x="190" y="25" text-anchor="middle" fill="#43E97B" font-size="10" font-weight="600">w = 7-8</text>
+          <text x="190" y="45" text-anchor="middle" fill="#43E97B" font-size="8">Optimal!</text>
+          <text x="190" y="70" text-anchor="middle" fill="#ccc" font-size="9">Balanced quality</text>
+          <text x="190" y="85" text-anchor="middle" fill="#ccc" font-size="9">Follows prompt well</text>
+          <text x="190" y="110" text-anchor="middle" fill="#43E97B" font-size="8">Sweet spot</text>
+          
+          <rect x="260" y="5" width="115" height="120" rx="10" fill="rgba(255,101,132,0.06)" stroke="rgba(255,101,132,0.2)" stroke-width="1"/>
+          <text x="317" y="25" text-anchor="middle" fill="#FF6584" font-size="10" font-weight="600">w = 20+</text>
+          <text x="317" y="45" text-anchor="middle" fill="#888" font-size="8">Over-guided</text>
+          <text x="317" y="70" text-anchor="middle" fill="#ccc" font-size="9">Saturated colors</text>
+          <text x="317" y="85" text-anchor="middle" fill="#ccc" font-size="9">Artifacts, distortion</text>
+          <text x="317" y="110" text-anchor="middle" fill="#FF6584" font-size="8">Too literal</text>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <h3 style="color:#43E97B; font-size:1em;">Noise Schedulers</h3>
+      <table class="compare-table" style="font-size:0.65em;">
+        <thead><tr><th>Scheduler</th><th>Steps</th><th>Quality</th></tr></thead>
+        <tbody>
+          <tr><td><strong>DDPM</strong></td><td>1000</td><td>Best, very slow</td></tr>
+          <tr><td><strong>DDIM</strong></td><td>20-50</td><td>Good, deterministic</td></tr>
+          <tr><td><strong>Euler</strong></td><td>20-30</td><td>Good, simple ODE</td></tr>
+          <tr><td><strong>DPM++ 2M</strong></td><td>15-25</td><td>Great, fast</td></tr>
+          <tr><td><strong>DPM++ SDE</strong></td><td>20-30</td><td>Best details</td></tr>
+        </tbody>
+      </table>
+      <div class="highlight-box" style="margin-top:15px;">
+        <p><strong>Quick guide:</strong><br>
+        Speed: DPM++ 2M (15 steps)<br>
+        Quality: DPM++ SDE (25 steps)<br>
+        Reproducible: DDIM (deterministic)</p>
+      </div>
+      <div style="margin-top:12px;">
+        <span class="tag tag-green">Negative prompts remove unwanted features</span>
+        <span class="tag tag-blue">Seed controls reproducibility</span>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    Two key controls determine the quality of generated images: Guidance Scale and Noise Scheduler.
+    CLASSIFIER-FREE GUIDANCE (CFG) is the most important generation parameter. Here's how it works:
+    At each denoising step, the U-Net runs TWICE: once with the text prompt (conditional prediction) and once WITHOUT any text (unconditional prediction).
+    The final noise prediction is: unconditional + w times (conditional minus unconditional).
+    W is the guidance scale. It amplifies the text-guided component. Higher w = more faithfulness to the prompt.
+    At w=1, no guidance amplification — the model is creative but may ignore the prompt.
+    At w=7-8, the sweet spot — good prompt adherence with natural-looking results. This is the default for most models.
+    At w=20+, over-guidance — colors become saturated, details get exaggerated, artifacts appear. The model tries TOO hard to match the text.
+    NOISE SCHEDULERS determine how noise is removed across timesteps. DDPM is the original — 1000 steps, highest quality, very slow.
+    DDIM reformulates diffusion as a deterministic ODE — same quality in 20-50 steps, and the same seed always produces the same image.
+    Euler and DPM++ are newer, faster schedulers. DPM++ 2M Karras is currently the community favorite — great quality in just 15-25 steps.
+    DPM++ SDE adds stochasticity for finer details at the cost of a few more steps.
+    Negative prompts are an underrated feature — they tell the model what NOT to generate. "blurry, low quality, deformed" dramatically improves results.
+    The seed controls the initial random noise — same seed + same prompt = same image. Essential for reproducibility and iterative refinement.
+  </aside>
+</section>
+
+<!-- ============== SLIDE 39: GENERATION STEP BY STEP ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #2e0f1a 100%)">
+  <h2>Image Generation &mdash; Step by Step</h2>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 330" xmlns="http://www.w3.org/2000/svg">
+      <!-- Step 1 -->
+      <rect x="10" y="10" width="155" height="310" rx="14" fill="rgba(108,99,255,0.06)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+      <text x="87" y="35" text-anchor="middle" fill="#6C63FF" font-size="12" font-weight="700">1. Encode Text</text>
+      <rect x="22" y="48" width="130" height="22" rx="5" fill="rgba(108,99,255,0.15)"/>
+      <text x="87" y="63" text-anchor="middle" fill="#ccc" font-size="8">"sunset over mountains"</text>
+      <text x="87" y="85" text-anchor="middle" fill="#888" font-size="10">&darr; CLIP</text>
+      <rect x="22" y="95" width="130" height="30" rx="6" fill="rgba(108,99,255,0.1)"/>
+      <text x="87" y="108" text-anchor="middle" fill="#6C63FF" font-size="8" font-weight="600">Text Embeddings</text>
+      <text x="87" y="120" text-anchor="middle" fill="#888" font-size="7">77 &times; 768 matrix</text>
+      
+      <text x="25" y="150" fill="#888" font-size="8">What happens:</text>
+      <text x="25" y="165" fill="#ccc" font-size="8">&bull; Tokenize prompt</text>
+      <text x="25" y="180" fill="#ccc" font-size="8">&bull; Pad to 77 tokens</text>
+      <text x="25" y="195" fill="#ccc" font-size="8">&bull; Encode via CLIP</text>
+      <text x="25" y="210" fill="#ccc" font-size="8">&bull; Also encode "" (empty)</text>
+      <text x="25" y="225" fill="#ccc" font-size="8">&nbsp;&nbsp;for CFG unconditional</text>
+      
+      <text x="25" y="255" fill="#888" font-size="8">Prompt engineering tips:</text>
+      <text x="25" y="270" fill="#43E97B" font-size="8">&bull; Be specific &amp; descriptive</text>
+      <text x="25" y="285" fill="#43E97B" font-size="8">&bull; Include style keywords</text>
+      <text x="25" y="300" fill="#43E97B" font-size="8">&bull; Use negative prompts</text>
+      
+      <!-- Step 2 -->
+      <rect x="175" y="10" width="155" height="310" rx="14" fill="rgba(255,101,132,0.06)" stroke="rgba(255,101,132,0.2)" stroke-width="1"/>
+      <text x="252" y="35" text-anchor="middle" fill="#FF6584" font-size="12" font-weight="700">2. Sample Noise</text>
+      <rect x="200" y="50" width="100" height="65" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <!-- Noise pattern -->
+      <circle cx="215" cy="65" r="2" fill="#888"/><circle cx="230" cy="60" r="2" fill="#666"/><circle cx="245" cy="70" r="2" fill="#777"/>
+      <circle cx="260" cy="62" r="1.5" fill="#555"/><circle cx="275" cy="68" r="2" fill="#888"/>
+      <circle cx="220" cy="80" r="1.5" fill="#666"/><circle cx="238" cy="78" r="2" fill="#777"/><circle cx="255" cy="85" r="2" fill="#555"/>
+      <circle cx="270" cy="82" r="1.5" fill="#888"/><circle cx="285" cy="75" r="2" fill="#666"/>
+      <circle cx="212" cy="95" r="2" fill="#777"/><circle cx="240" cy="92" r="1.5" fill="#555"/><circle cx="265" cy="98" r="2" fill="#888"/>
+      <circle cx="280" cy="95" r="1.5" fill="#666"/>
+      
+      <text x="252" y="135" text-anchor="middle" fill="#FF6584" font-size="9" font-weight="600">z&#x1D40; &sim; N(0, I)</text>
+      <text x="252" y="150" text-anchor="middle" fill="#888" font-size="8">64&times;64&times;4 latent tensor</text>
+      
+      <text x="190" y="175" fill="#888" font-size="8">What happens:</text>
+      <text x="190" y="190" fill="#ccc" font-size="8">&bull; Generate random tensor</text>
+      <text x="190" y="205" fill="#ccc" font-size="8">&bull; Shape: [1, 4, 64, 64]</text>
+      <text x="190" y="220" fill="#ccc" font-size="8">&bull; Seed controls this!</text>
+      <text x="190" y="235" fill="#ccc" font-size="8">&bull; Same seed = same noise</text>
+      <text x="190" y="250" fill="#ccc" font-size="8">&bull; = same final image</text>
+      
+      <text x="190" y="280" fill="#FFD93D" font-size="8" font-weight="600">Why 4 channels?</text>
+      <text x="190" y="295" fill="#888" font-size="8">VAE encodes RGB (3ch)</text>
+      <text x="190" y="308" fill="#888" font-size="8">into 4-ch latent space</text>
+      
+      <!-- Step 3 -->
+      <rect x="340" y="10" width="175" height="310" rx="14" fill="rgba(255,217,61,0.06)" stroke="rgba(255,217,61,0.2)" stroke-width="1.5"/>
+      <text x="427" y="35" text-anchor="middle" fill="#FFD93D" font-size="12" font-weight="700">3. Denoise Loop</text>
+      
+      <!-- Loop visualization -->
+      <rect x="355" y="50" width="145" height="200" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="427" y="68" text-anchor="middle" fill="#FFD93D" font-size="9" font-weight="600">for t = T, T-1, ..., 1:</text>
+      
+      <rect x="365" y="78" width="125" height="22" rx="5" fill="rgba(108,99,255,0.1)"/>
+      <text x="427" y="93" text-anchor="middle" fill="#ccc" font-size="7">U-Net predicts &epsilon;(z&#x209C;, t, text)</text>
+      
+      <rect x="365" y="106" width="125" height="22" rx="5" fill="rgba(255,101,132,0.1)"/>
+      <text x="427" y="121" text-anchor="middle" fill="#ccc" font-size="7">U-Net predicts &epsilon;(z&#x209C;, t, &empty;)</text>
+      
+      <rect x="365" y="134" width="125" height="22" rx="5" fill="rgba(255,217,61,0.1)"/>
+      <text x="427" y="149" text-anchor="middle" fill="#ccc" font-size="7">CFG: combine with scale w</text>
+      
+      <rect x="365" y="162" width="125" height="22" rx="5" fill="rgba(67,233,123,0.1)"/>
+      <text x="427" y="177" text-anchor="middle" fill="#ccc" font-size="7">Scheduler: z&#x209C; &rarr; z&#x209C;&#x208B;&#x2081;</text>
+      
+      <!-- Progress bar -->
+      <text x="365" y="210" fill="#888" font-size="7">Step progress:</text>
+      <rect x="365" y="215" width="125" height="8" rx="3" fill="rgba(255,255,255,0.1)"/>
+      <rect x="365" y="215" width="95" height="8" rx="3" fill="rgba(67,233,123,0.4)"/>
+      <text x="365" y="238" fill="#888" font-size="7">t=50 &rarr; t=12 (76% done)</text>
+      
+      <text x="355" y="268" fill="#888" font-size="8">Each step: ~0.05s on GPU</text>
+      <text x="355" y="283" fill="#888" font-size="8">25 steps = ~1.3 seconds</text>
+      <text x="355" y="298" fill="#888" font-size="8">50 steps = ~2.5 seconds</text>
+      <text x="355" y="313" fill="#888" font-size="8">(on RTX 3090 / A100)</text>
+      
+      <!-- Step 4 -->
+      <rect x="525" y="10" width="140" height="310" rx="14" fill="rgba(67,233,123,0.06)" stroke="rgba(67,233,123,0.2)" stroke-width="1"/>
+      <text x="595" y="35" text-anchor="middle" fill="#43E97B" font-size="12" font-weight="700">4. Decode Latent</text>
+      
+      <rect x="545" y="50" width="90" height="35" rx="6" fill="rgba(255,217,61,0.1)"/>
+      <text x="590" y="67" text-anchor="middle" fill="#FFD93D" font-size="8">Clean latent z&#x2080;</text>
+      <text x="590" y="78" text-anchor="middle" fill="#888" font-size="7">64&times;64&times;4</text>
+      
+      <text x="595" y="100" text-anchor="middle" fill="#888" font-size="10">&darr; VAE Decoder</text>
+      
+      <rect x="540" y="110" width="100" height="80" rx="8" fill="rgba(67,233,123,0.1)" stroke="#43E97B" stroke-width="1.5"/>
+      <text x="590" y="140" text-anchor="middle" fill="#43E97B" font-size="10" font-weight="700">Final Image</text>
+      <text x="590" y="158" text-anchor="middle" fill="#43E97B" font-size="9">512 &times; 512 &times; 3</text>
+      <text x="590" y="175" text-anchor="middle" fill="#888" font-size="8">RGB pixels</text>
+      
+      <text x="535" y="210" fill="#888" font-size="8">VAE upscales 8&times;:</text>
+      <text x="535" y="225" fill="#ccc" font-size="8">64 &times; 8 = 512 pixels</text>
+      <text x="535" y="245" fill="#888" font-size="8">Decoding is fast:</text>
+      <text x="535" y="260" fill="#ccc" font-size="8">~0.02 seconds</text>
+      <text x="535" y="280" fill="#888" font-size="8">SDXL: 1024&times;1024</text>
+      <text x="535" y="295" fill="#888" font-size="8">SD3: up to 2048&times;2048</text>
+      
+      <!-- Step 5 -->
+      <rect x="675" y="10" width="135" height="310" rx="14" fill="rgba(108,99,255,0.06)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+      <text x="742" y="35" text-anchor="middle" fill="#6C63FF" font-size="12" font-weight="700">5. Post-Process</text>
+      
+      <text x="690" y="60" fill="#ccc" font-size="9">Optional refinements:</text>
+      
+      <rect x="688" y="72" width="110" height="25" rx="6" fill="rgba(108,99,255,0.1)"/>
+      <text x="743" y="89" text-anchor="middle" fill="#ccc" font-size="8">Upscaling (4x)</text>
+      
+      <rect x="688" y="103" width="110" height="25" rx="6" fill="rgba(255,101,132,0.1)"/>
+      <text x="743" y="120" text-anchor="middle" fill="#ccc" font-size="8">Face restoration</text>
+      
+      <rect x="688" y="134" width="110" height="25" rx="6" fill="rgba(67,233,123,0.1)"/>
+      <text x="743" y="151" text-anchor="middle" fill="#ccc" font-size="8">Inpainting / editing</text>
+      
+      <rect x="688" y="165" width="110" height="25" rx="6" fill="rgba(255,217,61,0.1)"/>
+      <text x="743" y="182" text-anchor="middle" fill="#ccc" font-size="8">ControlNet (pose, edge)</text>
+      
+      <text x="690" y="215" fill="#888" font-size="8">ControlNet adds spatial</text>
+      <text x="690" y="230" fill="#888" font-size="8">control: guide generation</text>
+      <text x="690" y="245" fill="#888" font-size="8">with edge maps, depth,</text>
+      <text x="690" y="260" fill="#888" font-size="8">pose skeletons, etc.</text>
+      
+      <text x="690" y="290" fill="#FFD93D" font-size="8" font-weight="600">img2img:</text>
+      <text x="690" y="305" fill="#888" font-size="8">Start from existing image</text>
+      <text x="690" y="318" fill="#888" font-size="8">instead of pure noise</text>
+    </svg>
+  </div>
+  <aside class="notes">
+    Let's trace the complete generation process step by step.
+    STEP 1 — ENCODE TEXT: The prompt "sunset over mountains" goes through CLIP's text tokenizer (splits into subwords, pads to 77 tokens).
+    Then CLIP's text transformer encodes these into a 77x768 embedding matrix. We ALSO encode an empty string for classifier-free guidance.
+    Pro tip: prompt engineering matters! Be descriptive — "a majestic sunset with orange and purple hues over snow-capped mountains, photorealistic, 8K" works much better than just "sunset mountains."
+    STEP 2 — SAMPLE NOISE: Generate a random tensor from a standard normal distribution. Shape: [1, 4, 64, 64] — batch of 1, 4 channels, 64x64 spatial.
+    The seed controls the random number generator. Same seed = same noise = same image (given same prompt and settings). This is crucial for reproducibility.
+    Why 4 channels instead of 3 (RGB)? Because the VAE encoder compressed RGB images into a 4-channel latent space during training. The 4th channel captures additional information.
+    STEP 3 — DENOISE LOOP: This is where the magic happens. For each timestep from T down to 1:
+    Run the U-Net twice (conditional with text, unconditional without). Combine using CFG: amplify the text-guided component.
+    The scheduler then computes z_{t-1} from z_t and the noise prediction. Different schedulers have different math — DDIM is deterministic, DPM++ uses higher-order ODE solvers.
+    On a modern GPU, each step takes about 0.05 seconds. 25 steps = ~1.3 seconds total. Very fast!
+    STEP 4 — DECODE: The VAE decoder takes the clean 64x64x4 latent and upscales it to 512x512x3 RGB pixels. This is nearly instant (~0.02s).
+    STEP 5 — POST-PROCESS: Optionally apply upscaling (Real-ESRGAN for 4x), face restoration (GFPGAN/CodeFormer), or ControlNet for spatial guidance.
+    img2img is a powerful variant: instead of starting from pure noise, start from an existing image with some noise added. This lets you transform and edit images while keeping the overall structure.
+  </aside>
+</section>
+
+<!-- ============== SLIDE 40: PUTTING IT ALL TOGETHER ============== -->
+<!-- (renumbered from original Slide 34) -->
 <section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a1a0f 100%)">
   <h2>Putting It All Together</h2>
   <div class="viz-container">
