@@ -1356,7 +1356,895 @@
   </div>
 </section>
 
-<!-- ============== SLIDE 22: PUTTING IT ALL TOGETHER ============== -->
+<!-- ============== SLIDE 22: TOKENIZATION (BPE) ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a0f2e 100%)">
+  <h2>Tokenization &mdash; How Text Becomes Numbers</h2>
+  <p>Before an LLM sees text, it must be split into <strong style="color:#6C63FF">tokens</strong> using algorithms like BPE (Byte Pair Encoding).</p>
+  <div class="viz-container">
+    <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+      <!-- Raw text -->
+      <rect x="20" y="15" width="760" height="40" rx="10" fill="rgba(108,99,255,0.1)" stroke="#6C63FF" stroke-width="1.5"/>
+      <text x="400" y="28" text-anchor="middle" fill="#888" font-size="10">Raw Input</text>
+      <text x="400" y="46" text-anchor="middle" fill="#6C63FF" font-size="14" font-weight="600" font-family="'Fira Code', monospace">"Unhappiness is not the same as sadness"</text>
+      
+      <!-- Arrow -->
+      <text x="400" y="72" text-anchor="middle" fill="#888" font-size="14">&darr;</text>
+      
+      <!-- BPE Step 1 -->
+      <rect x="20" y="78" width="760" height="45" rx="10" fill="rgba(255,217,61,0.08)" stroke="#FFD93D" stroke-width="1"/>
+      <text x="50" y="95" fill="#FFD93D" font-size="10" font-weight="600">Step 1: Character Split</text>
+      <text x="50" y="113" fill="#aaa" font-size="10" font-family="'Fira Code', monospace">U n h a p p i n e s s _ i s _ n o t _ t h e _ s a m e _ a s _ s a d n e s s</text>
+      
+      <!-- Arrow -->
+      <text x="400" y="138" text-anchor="middle" fill="#888" font-size="14">&darr;</text>
+      
+      <!-- BPE Step 2 -->
+      <rect x="20" y="143" width="760" height="45" rx="10" fill="rgba(255,101,132,0.08)" stroke="#FF6584" stroke-width="1"/>
+      <text x="50" y="160" fill="#FF6584" font-size="10" font-weight="600">Step 2: Merge Most Frequent Pairs (th&rarr;th, es&rarr;es, ...)</text>
+      <text x="50" y="178" fill="#aaa" font-size="10" font-family="'Fira Code', monospace">Un | happ | iness | _is | _not | _the | _same | _as | _sad | ness</text>
+      
+      <!-- Arrow -->
+      <text x="400" y="203" text-anchor="middle" fill="#888" font-size="14">&darr;</text>
+      
+      <!-- BPE Final -->
+      <rect x="20" y="208" width="760" height="45" rx="10" fill="rgba(67,233,123,0.08)" stroke="#43E97B" stroke-width="1.5"/>
+      <text x="50" y="225" fill="#43E97B" font-size="10" font-weight="600">Final Tokens (after 50,000 merge operations)</text>
+      <!-- Token boxes -->
+      <rect x="50" y="232" width="55" height="18" rx="4" fill="rgba(108,99,255,0.25)"/><text x="77" y="244" text-anchor="middle" fill="#fff" font-size="9">Un</text>
+      <rect x="110" y="232" width="65" height="18" rx="4" fill="rgba(255,101,132,0.25)"/><text x="142" y="244" text-anchor="middle" fill="#fff" font-size="9">happiness</text>
+      <rect x="180" y="232" width="30" height="18" rx="4" fill="rgba(67,233,123,0.25)"/><text x="195" y="244" text-anchor="middle" fill="#fff" font-size="9">_is</text>
+      <rect x="215" y="232" width="40" height="18" rx="4" fill="rgba(255,217,61,0.25)"/><text x="235" y="244" text-anchor="middle" fill="#fff" font-size="9">_not</text>
+      <rect x="260" y="232" width="40" height="18" rx="4" fill="rgba(108,99,255,0.25)"/><text x="280" y="244" text-anchor="middle" fill="#fff" font-size="9">_the</text>
+      <rect x="305" y="232" width="50" height="18" rx="4" fill="rgba(255,101,132,0.25)"/><text x="330" y="244" text-anchor="middle" fill="#fff" font-size="9">_same</text>
+      <rect x="360" y="232" width="30" height="18" rx="4" fill="rgba(67,233,123,0.25)"/><text x="375" y="244" text-anchor="middle" fill="#fff" font-size="9">_as</text>
+      <rect x="395" y="232" width="60" height="18" rx="4" fill="rgba(255,217,61,0.25)"/><text x="425" y="244" text-anchor="middle" fill="#fff" font-size="9">_sadness</text>
+      
+      <!-- Token IDs -->
+      <text x="50" y="270" fill="#888" font-size="9">Token IDs:</text>
+      <text x="50" y="285" fill="#6C63FF" font-size="10" font-family="'Fira Code', monospace">[1248, 58553, 374, 539, 279, 1890, 439, 51978]</text>
+      
+      <!-- Side info -->
+      <rect x="560" y="232" width="210" height="55" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="575" y="250" fill="#FFD93D" font-size="10" font-weight="600">Vocabulary Sizes</text>
+      <text x="575" y="266" fill="#aaa" font-size="9">GPT-4: ~100,000 tokens</text>
+      <text x="575" y="280" fill="#aaa" font-size="9">LLaMA 2: ~32,000 tokens</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============== SLIDE 23: ATTENTION WITH NUMBERS ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a0f2e 100%)">
+  <h2>Self-Attention &mdash; Step by Step with Numbers</h2>
+  <p>Tracing attention for the sentence <code>"The cat sat"</code> with embedding dim = 4</p>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg">
+      <!-- Step 1: Input embeddings -->
+      <rect x="10" y="10" width="185" height="155" rx="12" fill="rgba(108,99,255,0.06)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+      <text x="102" y="32" text-anchor="middle" fill="#6C63FF" font-size="11" font-weight="700">1. Input Embeddings</text>
+      <text x="25" y="55" fill="#ccc" font-size="9" font-family="'Fira Code', monospace">"The" = [1.0, 0.5, 0.2, 0.8]</text>
+      <text x="25" y="73" fill="#ccc" font-size="9" font-family="'Fira Code', monospace">"cat" = [0.3, 0.9, 0.7, 0.1]</text>
+      <text x="25" y="91" fill="#ccc" font-size="9" font-family="'Fira Code', monospace">"sat" = [0.6, 0.2, 0.9, 0.4]</text>
+      <text x="25" y="115" fill="#888" font-size="8">Each token &rarr; d-dimensional vector</text>
+      <text x="25" y="130" fill="#888" font-size="8">Multiply by W_Q, W_K, W_V matrices</text>
+      <text x="25" y="145" fill="#888" font-size="8">to get Q, K, V for each token</text>
+      
+      <!-- Arrow -->
+      <text x="203" y="85" fill="#888" font-size="16">&rarr;</text>
+      
+      <!-- Step 2: Q, K, V -->
+      <rect x="215" y="10" width="195" height="155" rx="12" fill="rgba(255,101,132,0.06)" stroke="rgba(255,101,132,0.2)" stroke-width="1"/>
+      <text x="312" y="32" text-anchor="middle" fill="#FF6584" font-size="11" font-weight="700">2. Q, K, V Vectors</text>
+      <text x="225" y="52" fill="#6C63FF" font-size="9">Q_cat = [0.8, 0.3, 0.5, 0.2]</text>
+      <text x="225" y="70" fill="#FF6584" font-size="9">K_the = [0.6, 0.4, 0.1, 0.7]</text>
+      <text x="225" y="85" fill="#FF6584" font-size="9">K_cat = [0.2, 0.8, 0.6, 0.3]</text>
+      <text x="225" y="100" fill="#FF6584" font-size="9">K_sat = [0.5, 0.1, 0.8, 0.4]</text>
+      <text x="225" y="120" fill="#888" font-size="8">Q_cat &middot; K_the = 0.48+0.12+0.05+0.14</text>
+      <text x="225" y="135" fill="#FFD93D" font-size="9" font-weight="600">= 0.79</text>
+      <text x="225" y="150" fill="#888" font-size="8">Q_cat &middot; K_cat = 1.05, Q_cat &middot; K_sat = 0.89</text>
+      
+      <!-- Arrow -->
+      <text x="418" y="85" fill="#888" font-size="16">&rarr;</text>
+      
+      <!-- Step 3: Scale + Softmax -->
+      <rect x="430" y="10" width="185" height="155" rx="12" fill="rgba(255,217,61,0.06)" stroke="rgba(255,217,61,0.2)" stroke-width="1"/>
+      <text x="522" y="32" text-anchor="middle" fill="#FFD93D" font-size="11" font-weight="700">3. Scale + Softmax</text>
+      <text x="445" y="55" fill="#ccc" font-size="9">Scores / &radic;d_k = / &radic;4 = / 2</text>
+      <text x="445" y="73" fill="#ccc" font-size="9" font-family="'Fira Code', monospace">[0.79, 1.05, 0.89] / 2</text>
+      <text x="445" y="91" fill="#ccc" font-size="9" font-family="'Fira Code', monospace">= [0.40, 0.53, 0.45]</text>
+      <text x="445" y="115" fill="#888" font-size="8">Softmax (normalize to sum=1):</text>
+      <text x="445" y="133" fill="#43E97B" font-size="10" font-weight="600" font-family="'Fira Code', monospace">[0.30, 0.38, 0.32]</text>
+      <text x="445" y="150" fill="#888" font-size="8">"cat" attends most to itself (0.38)</text>
+      
+      <!-- Arrow -->
+      <text x="623" y="85" fill="#888" font-size="16">&rarr;</text>
+      
+      <!-- Step 4: Weighted Sum -->
+      <rect x="635" y="10" width="175" height="155" rx="12" fill="rgba(67,233,123,0.06)" stroke="rgba(67,233,123,0.2)" stroke-width="1"/>
+      <text x="722" y="32" text-anchor="middle" fill="#43E97B" font-size="11" font-weight="700">4. Weighted Sum</text>
+      <text x="645" y="55" fill="#ccc" font-size="9">output = &Sigma; attention &times; V</text>
+      <text x="645" y="75" fill="#ccc" font-size="9">= 0.30&times;V_the</text>
+      <text x="645" y="90" fill="#ccc" font-size="9">+ 0.38&times;V_cat</text>
+      <text x="645" y="105" fill="#ccc" font-size="9">+ 0.32&times;V_sat</text>
+      <text x="645" y="128" fill="#43E97B" font-size="9" font-weight="600">Context-aware "cat"</text>
+      <text x="645" y="143" fill="#43E97B" font-size="9" font-weight="600">representation!</text>
+      
+      <!-- Attention heatmap -->
+      <rect x="10" y="180" width="800" height="150" rx="12" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="400" y="200" text-anchor="middle" fill="#FFD93D" font-size="12" font-weight="700">Attention Heatmap (what each token "looks at")</text>
+      
+      <!-- Headers -->
+      <text x="210" y="225" text-anchor="middle" fill="#888" font-size="10" font-weight="600">The</text>
+      <text x="310" y="225" text-anchor="middle" fill="#888" font-size="10" font-weight="600">cat</text>
+      <text x="410" y="225" text-anchor="middle" fill="#888" font-size="10" font-weight="600">sat</text>
+      
+      <!-- Row: The -->
+      <text x="140" y="250" text-anchor="end" fill="#ccc" font-size="10">The &rarr;</text>
+      <rect x="175" y="235" width="70" height="22" rx="4" fill="rgba(108,99,255,0.5)"/><text x="210" y="250" text-anchor="middle" fill="#fff" font-size="9">0.45</text>
+      <rect x="275" y="235" width="70" height="22" rx="4" fill="rgba(108,99,255,0.25)"/><text x="310" y="250" text-anchor="middle" fill="#fff" font-size="9">0.30</text>
+      <rect x="375" y="235" width="70" height="22" rx="4" fill="rgba(108,99,255,0.20)"/><text x="410" y="250" text-anchor="middle" fill="#fff" font-size="9">0.25</text>
+      
+      <!-- Row: cat -->
+      <text x="140" y="275" text-anchor="end" fill="#ccc" font-size="10">cat &rarr;</text>
+      <rect x="175" y="260" width="70" height="22" rx="4" fill="rgba(255,101,132,0.25)"/><text x="210" y="275" text-anchor="middle" fill="#fff" font-size="9">0.30</text>
+      <rect x="275" y="260" width="70" height="22" rx="4" fill="rgba(255,101,132,0.6)"/><text x="310" y="275" text-anchor="middle" fill="#fff" font-size="9">0.38</text>
+      <rect x="375" y="260" width="70" height="22" rx="4" fill="rgba(255,101,132,0.3)"/><text x="410" y="275" text-anchor="middle" fill="#fff" font-size="9">0.32</text>
+      
+      <!-- Row: sat -->
+      <text x="140" y="300" text-anchor="end" fill="#ccc" font-size="10">sat &rarr;</text>
+      <rect x="175" y="285" width="70" height="22" rx="4" fill="rgba(67,233,123,0.18)"/><text x="210" y="300" text-anchor="middle" fill="#fff" font-size="9">0.22</text>
+      <rect x="275" y="285" width="70" height="22" rx="4" fill="rgba(67,233,123,0.35)"/><text x="310" y="300" text-anchor="middle" fill="#fff" font-size="9">0.35</text>
+      <rect x="375" y="285" width="70" height="22" rx="4" fill="rgba(67,233,123,0.5)"/><text x="410" y="300" text-anchor="middle" fill="#fff" font-size="9">0.43</text>
+      
+      <!-- Insight -->
+      <text x="520" y="255" fill="#888" font-size="9">Darker = higher attention</text>
+      <text x="520" y="275" fill="#ccc" font-size="9">"sat" pays most attention to itself</text>
+      <text x="520" y="290" fill="#ccc" font-size="9">&amp; "cat" (who sat?)</text>
+      <text x="520" y="310" fill="#43E97B" font-size="9" font-weight="600">This is how context is captured!</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============== SLIDE 24: POSITIONAL ENCODING ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a0f2e 100%)">
+  <h2>Positional Encoding &mdash; Order Matters</h2>
+  <p>Transformers have no built-in notion of order. <strong style="color:#FF6584">Positional encodings</strong> inject position info.</p>
+  <div class="two-col">
+    <div>
+      <div class="highlight-box">
+        <p><strong>Problem:</strong> "Dog bites man" vs "Man bites dog" &mdash; same tokens, different meaning!<br>
+        <strong>Solution:</strong> Add a unique position signal to each token's embedding.</p>
+      </div>
+      <div class="code-block" style="margin-top:12px;">
+        <span class="comment"># Sinusoidal Encoding (original)</span><br>
+        PE(pos, 2i) &nbsp;= <span class="func">sin</span>(pos / 10000^(2i/d))<br>
+        PE(pos, 2i+1) = <span class="func">cos</span>(pos / 10000^(2i/d))<br><br>
+        <span class="comment"># Position 0, dimension 0:</span><br>
+        PE(0,0) = sin(0) = <span class="string">0.000</span><br>
+        <span class="comment"># Position 1, dimension 0:</span><br>
+        PE(1,0) = sin(1) = <span class="string">0.841</span><br>
+        <span class="comment"># Position 2, dimension 0:</span><br>
+        PE(2,0) = sin(2) = <span class="string">0.909</span>
+      </div>
+      <p style="font-size:0.7em; color:#888; margin-top:10px;">Modern models (GPT, LLaMA) use <strong style="color:#43E97B">learned positional embeddings</strong> or <strong style="color:#FFD93D">RoPE</strong> (Rotary Position Encoding) instead.</p>
+    </div>
+    <div>
+      <div class="viz-container">
+        <svg viewBox="0 0 360 310" xmlns="http://www.w3.org/2000/svg">
+          <text x="180" y="20" text-anchor="middle" fill="#FFD93D" font-size="12" font-weight="700">Token Embedding + Position Encoding</text>
+          
+          <!-- Token embedding -->
+          <rect x="20" y="40" width="150" height="90" rx="10" fill="rgba(108,99,255,0.1)" stroke="#6C63FF" stroke-width="1.5"/>
+          <text x="95" y="60" text-anchor="middle" fill="#6C63FF" font-size="10" font-weight="600">Token Embedding</text>
+          <text x="30" y="80" fill="#ccc" font-size="8" font-family="'Fira Code', monospace">"cat" = [0.3, 0.9, 0.7, 0.1]</text>
+          <text x="30" y="95" fill="#888" font-size="8">Semantic meaning</text>
+          <text x="30" y="110" fill="#888" font-size="8">(what the word means)</text>
+          
+          <!-- Plus sign -->
+          <text x="180" y="88" text-anchor="middle" fill="#FFD93D" font-size="24" font-weight="700">+</text>
+          
+          <!-- Positional encoding -->
+          <rect x="195" y="40" width="150" height="90" rx="10" fill="rgba(255,101,132,0.1)" stroke="#FF6584" stroke-width="1.5"/>
+          <text x="270" y="60" text-anchor="middle" fill="#FF6584" font-size="10" font-weight="600">Position Encoding</text>
+          <text x="205" y="80" fill="#ccc" font-size="8" font-family="'Fira Code', monospace">pos=2 = [0.9, -0.4, 0.0, 1.0]</text>
+          <text x="205" y="95" fill="#888" font-size="8">Where in the sequence</text>
+          <text x="205" y="110" fill="#888" font-size="8">(position information)</text>
+          
+          <!-- Equals -->
+          <text x="180" y="155" text-anchor="middle" fill="#888" font-size="14">&darr;&darr;&darr;</text>
+          
+          <!-- Result -->
+          <rect x="50" y="165" width="260" height="50" rx="10" fill="rgba(67,233,123,0.1)" stroke="#43E97B" stroke-width="2"/>
+          <text x="180" y="185" text-anchor="middle" fill="#43E97B" font-size="11" font-weight="600">Final Input to Transformer</text>
+          <text x="60" y="203" fill="#ccc" font-size="9" font-family="'Fira Code', monospace">[1.2, 0.5, 0.7, 1.1] (meaning + position)</text>
+          
+          <!-- RoPE box -->
+          <rect x="20" y="235" width="320" height="65" rx="10" fill="rgba(255,217,61,0.06)" stroke="rgba(255,217,61,0.2)" stroke-width="1"/>
+          <text x="30" y="255" fill="#FFD93D" font-size="10" font-weight="600">RoPE (Rotary Position Embedding) &mdash; used in LLaMA, Mistral</text>
+          <text x="30" y="272" fill="#aaa" font-size="9">Rotates embedding vectors by position-dependent angles</text>
+          <text x="30" y="287" fill="#aaa" font-size="9">Relative positions captured via rotation: dot(q_m, k_n) depends on m-n</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 25: ACTIVATION FUNCTIONS ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a0f2e 100%)">
+  <h2>Activation Functions &mdash; Adding Non-Linearity</h2>
+  <p>Without activations, a neural network is just matrix multiplication &mdash; a <strong style="color:#FF6584">linear function</strong>.</p>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg">
+      <!-- ReLU -->
+      <rect x="10" y="10" width="250" height="280" rx="14" fill="rgba(108,99,255,0.06)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+      <text x="135" y="35" text-anchor="middle" fill="#6C63FF" font-size="14" font-weight="700">ReLU</text>
+      <text x="135" y="52" text-anchor="middle" fill="#888" font-size="10">f(x) = max(0, x)</text>
+      
+      <!-- ReLU graph -->
+      <line x1="40" y1="160" x2="230" y2="160" stroke="#444" stroke-width="1"/>
+      <line x1="135" y1="80" x2="135" y2="220" stroke="#444" stroke-width="1"/>
+      <line x1="40" y1="160" x2="135" y2="160" stroke="#6C63FF" stroke-width="3"/>
+      <line x1="135" y1="160" x2="230" y2="80" stroke="#6C63FF" stroke-width="3"/>
+      <circle cx="135" cy="160" r="4" fill="#6C63FF"/>
+      <text x="55" y="155" fill="#888" font-size="8">negative &rarr; 0</text>
+      <text x="165" y="110" fill="#6C63FF" font-size="8">positive &rarr; x</text>
+      
+      <text x="30" y="240" fill="#43E97B" font-size="9">+ Simple, fast, sparse</text>
+      <text x="30" y="256" fill="#FF6584" font-size="9">- "Dying ReLU" (neurons stuck at 0)</text>
+      <text x="30" y="275" fill="#888" font-size="9">Used in: early transformers, CNNs</text>
+      
+      <!-- GELU -->
+      <rect x="280" y="10" width="250" height="280" rx="14" fill="rgba(67,233,123,0.06)" stroke="rgba(67,233,123,0.3)" stroke-width="2"/>
+      <text x="405" y="35" text-anchor="middle" fill="#43E97B" font-size="14" font-weight="700">GELU (used in GPT/BERT)</text>
+      <text x="405" y="52" text-anchor="middle" fill="#888" font-size="10">f(x) = x &middot; &Phi;(x)</text>
+      
+      <!-- GELU graph -->
+      <line x1="310" y1="160" x2="500" y2="160" stroke="#444" stroke-width="1"/>
+      <line x1="405" y1="80" x2="405" y2="220" stroke="#444" stroke-width="1"/>
+      <!-- Smooth curve approximation -->
+      <path d="M310,162 Q340,163 360,162 Q380,160 395,158 Q405,150 415,135 Q430,110 450,95 Q470,82 500,75" fill="none" stroke="#43E97B" stroke-width="3"/>
+      <text x="325" y="155" fill="#888" font-size="8">smooth near 0</text>
+      <text x="435" y="100" fill="#43E97B" font-size="8">&asymp; x for large x</text>
+      
+      <text x="300" y="240" fill="#43E97B" font-size="9">+ Smooth, no dying neurons</text>
+      <text x="300" y="256" fill="#43E97B" font-size="9">+ Better gradient flow</text>
+      <text x="300" y="275" fill="#FFD93D" font-size="9" font-weight="600">Default in modern LLMs!</text>
+      
+      <!-- SiLU/Swish -->
+      <rect x="550" y="10" width="250" height="280" rx="14" fill="rgba(255,217,61,0.06)" stroke="rgba(255,217,61,0.2)" stroke-width="1"/>
+      <text x="675" y="35" text-anchor="middle" fill="#FFD93D" font-size="14" font-weight="700">SiLU / Swish</text>
+      <text x="675" y="52" text-anchor="middle" fill="#888" font-size="10">f(x) = x &middot; &sigma;(x)</text>
+      
+      <!-- SiLU graph -->
+      <line x1="580" y1="160" x2="770" y2="160" stroke="#444" stroke-width="1"/>
+      <line x1="675" y1="80" x2="675" y2="220" stroke="#444" stroke-width="1"/>
+      <path d="M580,165 Q620,172 645,170 Q665,165 675,155 Q690,135 710,110 Q730,90 770,75" fill="none" stroke="#FFD93D" stroke-width="3"/>
+      <text x="600" y="180" fill="#888" font-size="8">slight dip below 0</text>
+      
+      <text x="570" y="240" fill="#43E97B" font-size="9">+ Smooth, non-monotonic</text>
+      <text x="570" y="256" fill="#43E97B" font-size="9">+ Self-gating mechanism</text>
+      <text x="570" y="275" fill="#888" font-size="9">Used in: LLaMA, PaLM, Mistral</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============== SLIDE 26: LOSS FUNCTIONS ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a0f2e 100%)">
+  <h2>Loss Functions &mdash; Measuring Error</h2>
+  <div class="two-col">
+    <div>
+      <h3 style="color:#FF6584; font-size:1em;">Cross-Entropy Loss (used in LLMs)</h3>
+      <div class="highlight-box">
+        <p>Measures how different the model's predicted probability distribution is from the true distribution.</p>
+      </div>
+      <div class="code-block" style="margin-top:12px;">
+        <span class="comment"># True next token: "cat" (index 5)</span><br>
+        <span class="comment"># Model predicts:</span><br>
+        probs = [0.01, 0.02, 0.05, 0.02,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.1, <span class="string">0.7</span>, 0.03, 0.07]<br>
+        <span class="comment">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&uarr; p("cat")=0.7</span><br><br>
+        <span class="comment"># Cross-Entropy Loss:</span><br>
+        loss = -<span class="func">log</span>(0.7) = <span class="string">0.357</span><br><br>
+        <span class="comment"># If model was wrong (p("cat")=0.01):</span><br>
+        loss = -<span class="func">log</span>(0.01) = <span class="string">4.605</span>  <span class="comment"># much higher!</span>
+      </div>
+    </div>
+    <div>
+      <div class="viz-container">
+        <svg viewBox="0 0 360 310" xmlns="http://www.w3.org/2000/svg">
+          <text x="180" y="20" text-anchor="middle" fill="#FFD93D" font-size="12" font-weight="700">-log(p) Curve: Loss vs Confidence</text>
+          
+          <!-- Axes -->
+          <line x1="50" y1="260" x2="340" y2="260" stroke="#555" stroke-width="1"/>
+          <line x1="50" y1="260" x2="50" y2="30" stroke="#555" stroke-width="1"/>
+          <text x="195" y="290" text-anchor="middle" fill="#888" font-size="10">Predicted Probability (p)</text>
+          <text x="20" y="150" text-anchor="middle" fill="#888" font-size="10" transform="rotate(-90,20,150)">Loss</text>
+          
+          <!-- Curve: -log(p) -->
+          <path d="M55,30 Q70,60 90,100 Q120,155 160,195 Q200,225 250,245 Q300,255 340,258" fill="none" stroke="#FF6584" stroke-width="3"/>
+          
+          <!-- Labels -->
+          <text x="60" y="275" fill="#888" font-size="9">0.0</text>
+          <text x="195" y="275" fill="#888" font-size="9">0.5</text>
+          <text x="330" y="275" fill="#888" font-size="9">1.0</text>
+          
+          <!-- Point: high loss -->
+          <circle cx="75" cy="72" r="6" fill="#FF6584"/>
+          <text x="90" y="65" fill="#FF6584" font-size="9">p=0.05</text>
+          <text x="90" y="78" fill="#FF6584" font-size="9">loss=3.0</text>
+          
+          <!-- Point: medium -->
+          <circle cx="160" cy="195" r="6" fill="#FFD93D"/>
+          <text x="115" y="188" fill="#FFD93D" font-size="9">p=0.5</text>
+          <text x="115" y="201" fill="#FFD93D" font-size="9">loss=0.69</text>
+          
+          <!-- Point: low loss -->
+          <circle cx="300" cy="250" r="6" fill="#43E97B"/>
+          <text x="255" y="240" fill="#43E97B" font-size="9">p=0.9</text>
+          <text x="255" y="253" fill="#43E97B" font-size="9">loss=0.11</text>
+          
+          <!-- Insight -->
+          <rect x="170" y="40" width="170" height="45" rx="8" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <text x="255" y="57" text-anchor="middle" fill="#ccc" font-size="9">Confident &amp; correct = low loss</text>
+          <text x="255" y="73" text-anchor="middle" fill="#ccc" font-size="9">Confident &amp; wrong = very high loss</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 27: OPTIMIZERS DEEP DIVE ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a0f2e 100%)">
+  <h2>Optimizers &mdash; How We Update Parameters</h2>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 320" xmlns="http://www.w3.org/2000/svg">
+      <!-- SGD -->
+      <rect x="10" y="10" width="250" height="300" rx="14" fill="rgba(108,99,255,0.06)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+      <text x="135" y="38" text-anchor="middle" fill="#6C63FF" font-size="14" font-weight="700">SGD</text>
+      <text x="135" y="55" text-anchor="middle" fill="#888" font-size="9">Stochastic Gradient Descent</text>
+      
+      <text x="25" y="78" fill="#ccc" font-size="10" font-family="'Fira Code', monospace">w = w - lr * gradient</text>
+      
+      <!-- SGD path visualization (zigzag) -->
+      <ellipse cx="135" cy="175" rx="90" ry="55" fill="none" stroke="#333" stroke-width="1"/>
+      <ellipse cx="135" cy="175" rx="50" ry="30" fill="none" stroke="#333" stroke-width="0.5"/>
+      <circle cx="135" cy="175" r="4" fill="#43E97B"/>
+      <path d="M50,120 L100,200 L80,145 L130,195 L115,165 L135,178" fill="none" stroke="#6C63FF" stroke-width="2"/>
+      <circle cx="50" cy="120" r="4" fill="#6C63FF"/>
+      <text x="35" y="115" fill="#6C63FF" font-size="8">start</text>
+      
+      <text x="25" y="250" fill="#43E97B" font-size="9">+ Simple &amp; well-understood</text>
+      <text x="25" y="266" fill="#FF6584" font-size="9">- Oscillates, slow convergence</text>
+      <text x="25" y="282" fill="#FF6584" font-size="9">- Same LR for all parameters</text>
+      <text x="25" y="298" fill="#888" font-size="9">LR: 0.01 typical</text>
+      
+      <!-- Adam -->
+      <rect x="280" y="10" width="260" height="300" rx="14" fill="rgba(67,233,123,0.06)" stroke="rgba(67,233,123,0.3)" stroke-width="2"/>
+      <text x="410" y="38" text-anchor="middle" fill="#43E97B" font-size="14" font-weight="700">Adam (used in LLMs)</text>
+      <text x="410" y="55" text-anchor="middle" fill="#888" font-size="9">Adaptive Moment Estimation</text>
+      
+      <text x="295" y="78" fill="#ccc" font-size="9" font-family="'Fira Code', monospace">m = &beta;1*m + (1-&beta;1)*grad</text>
+      <text x="295" y="93" fill="#888" font-size="8">momentum (running avg of gradients)</text>
+      <text x="295" y="110" fill="#ccc" font-size="9" font-family="'Fira Code', monospace">v = &beta;2*v + (1-&beta;2)*grad&sup2;</text>
+      <text x="295" y="125" fill="#888" font-size="8">velocity (running avg of squared gradients)</text>
+      <text x="295" y="142" fill="#FFD93D" font-size="9" font-family="'Fira Code', monospace">w = w - lr * m/(&radic;v + &epsilon;)</text>
+      
+      <!-- Adam path (smooth) -->
+      <ellipse cx="410" cy="195" rx="90" ry="55" fill="none" stroke="#333" stroke-width="1"/>
+      <ellipse cx="410" cy="195" rx="50" ry="30" fill="none" stroke="#333" stroke-width="0.5"/>
+      <circle cx="410" cy="195" r="4" fill="#43E97B"/>
+      <path d="M320,145 Q350,165 370,180 Q390,190 405,193 Q408,195 410,195" fill="none" stroke="#43E97B" stroke-width="2"/>
+      <circle cx="320" cy="145" r="4" fill="#43E97B"/>
+      <text x="305" y="140" fill="#43E97B" font-size="8">start</text>
+      
+      <text x="295" y="265" fill="#43E97B" font-size="9">+ Per-parameter learning rates</text>
+      <text x="295" y="281" fill="#43E97B" font-size="9">+ Fast convergence, smooth path</text>
+      <text x="295" y="297" fill="#888" font-size="9">&beta;1=0.9, &beta;2=0.999, lr=3e-4</text>
+      
+      <!-- AdamW -->
+      <rect x="560" y="10" width="250" height="300" rx="14" fill="rgba(255,217,61,0.06)" stroke="rgba(255,217,61,0.2)" stroke-width="1"/>
+      <text x="685" y="38" text-anchor="middle" fill="#FFD93D" font-size="14" font-weight="700">AdamW</text>
+      <text x="685" y="55" text-anchor="middle" fill="#888" font-size="9">Adam + Decoupled Weight Decay</text>
+      
+      <text x="575" y="78" fill="#ccc" font-size="9" font-family="'Fira Code', monospace">Same as Adam, but:</text>
+      <text x="575" y="96" fill="#ccc" font-size="9" font-family="'Fira Code', monospace">w = w - lr*(m/(&radic;v+&epsilon;))</text>
+      <text x="575" y="114" fill="#FFD93D" font-size="9" font-family="'Fira Code', monospace">&nbsp;&nbsp;&nbsp;&nbsp;- lr*&lambda;*w</text>
+      <text x="575" y="130" fill="#888" font-size="8">&lambda; = weight decay rate (e.g. 0.01)</text>
+      
+      <!-- Why it matters -->
+      <rect x="575" y="145" width="220" height="70" rx="8" fill="rgba(255,255,255,0.03)"/>
+      <text x="585" y="165" fill="#ccc" font-size="9">Weight decay pushes weights</text>
+      <text x="585" y="180" fill="#ccc" font-size="9">toward zero &rarr; prevents</text>
+      <text x="585" y="195" fill="#ccc" font-size="9">overfitting (regularization)</text>
+      
+      <text x="575" y="240" fill="#43E97B" font-size="9">+ Better generalization</text>
+      <text x="575" y="256" fill="#43E97B" font-size="9">+ Proper L2 regularization</text>
+      <text x="575" y="275" fill="#FFD93D" font-size="9" font-weight="600">Standard for LLM training!</text>
+      <text x="575" y="297" fill="#888" font-size="9">Used in GPT, LLaMA, Mistral</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============== SLIDE 28: WEIGHT INITIALIZATION ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a0f2e 100%)">
+  <h2>Weight Initialization &mdash; Where Training Begins</h2>
+  <p>How you initialize weights determines whether training <strong style="color:#43E97B">converges</strong> or <strong style="color:#FF6584">explodes/vanishes</strong>.</p>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 280" xmlns="http://www.w3.org/2000/svg">
+      <!-- All Zeros (bad) -->
+      <rect x="10" y="10" width="190" height="260" rx="14" fill="rgba(255,101,132,0.06)" stroke="#FF6584" stroke-width="1.5"/>
+      <text x="105" y="35" text-anchor="middle" fill="#FF6584" font-size="12" font-weight="700">All Zeros</text>
+      <text x="105" y="50" text-anchor="middle" fill="#888" font-size="9">w = 0 for all</text>
+      <!-- Bar chart - all same -->
+      <rect x="30" y="80" width="20" height="80" rx="3" fill="rgba(255,101,132,0.3)"/>
+      <rect x="55" y="80" width="20" height="80" rx="3" fill="rgba(255,101,132,0.3)"/>
+      <rect x="80" y="80" width="20" height="80" rx="3" fill="rgba(255,101,132,0.3)"/>
+      <rect x="105" y="80" width="20" height="80" rx="3" fill="rgba(255,101,132,0.3)"/>
+      <rect x="130" y="80" width="20" height="80" rx="3" fill="rgba(255,101,132,0.3)"/>
+      <rect x="155" y="80" width="20" height="80" rx="3" fill="rgba(255,101,132,0.3)"/>
+      <text x="105" y="185" text-anchor="middle" fill="#FF6584" font-size="10" font-weight="600">All neurons identical!</text>
+      <text x="105" y="205" text-anchor="middle" fill="#888" font-size="9">Same gradients</text>
+      <text x="105" y="220" text-anchor="middle" fill="#888" font-size="9">= same updates</text>
+      <text x="105" y="235" text-anchor="middle" fill="#888" font-size="9">= network can't learn</text>
+      <text x="105" y="258" text-anchor="middle" fill="#FF6584" font-size="11" font-weight="700">NEVER DO THIS</text>
+      
+      <!-- Xavier/Glorot -->
+      <rect x="215" y="10" width="195" height="260" rx="14" fill="rgba(108,99,255,0.06)" stroke="#6C63FF" stroke-width="1.5"/>
+      <text x="312" y="35" text-anchor="middle" fill="#6C63FF" font-size="12" font-weight="700">Xavier / Glorot</text>
+      <text x="312" y="50" text-anchor="middle" fill="#888" font-size="9">w ~ N(0, 2/(n_in + n_out))</text>
+      <!-- Bell curve distribution -->
+      <path d="M235,150 Q260,148 280,130 Q295,100 312,80 Q330,100 345,130 Q365,148 390,150" fill="rgba(108,99,255,0.15)" stroke="#6C63FF" stroke-width="2"/>
+      <line x1="235" y1="150" x2="390" y2="150" stroke="#444" stroke-width="1"/>
+      <text x="312" y="145" text-anchor="middle" fill="#6C63FF" font-size="8">0</text>
+      <text x="312" y="175" text-anchor="middle" fill="#888" font-size="9">Balanced variance</text>
+      <text x="312" y="195" text-anchor="middle" fill="#43E97B" font-size="9">+ Good for sigmoid/tanh</text>
+      <text x="312" y="210" text-anchor="middle" fill="#888" font-size="9">Keeps signal stable</text>
+      <text x="312" y="225" text-anchor="middle" fill="#888" font-size="9">across layers</text>
+      <text x="312" y="255" text-anchor="middle" fill="#6C63FF" font-size="10" font-weight="600">Good for BERT, older models</text>
+      
+      <!-- He/Kaiming -->
+      <rect x="425" y="10" width="195" height="260" rx="14" fill="rgba(67,233,123,0.06)" stroke="#43E97B" stroke-width="2"/>
+      <text x="522" y="35" text-anchor="middle" fill="#43E97B" font-size="12" font-weight="700">He / Kaiming</text>
+      <text x="522" y="50" text-anchor="middle" fill="#888" font-size="9">w ~ N(0, 2/n_in)</text>
+      <!-- Wider bell curve -->
+      <path d="M440,150 Q465,146 490,120 Q510,85 522,65 Q535,85 555,120 Q580,146 605,150" fill="rgba(67,233,123,0.15)" stroke="#43E97B" stroke-width="2"/>
+      <line x1="440" y1="150" x2="605" y2="150" stroke="#444" stroke-width="1"/>
+      <text x="522" y="145" text-anchor="middle" fill="#43E97B" font-size="8">0</text>
+      <text x="522" y="175" text-anchor="middle" fill="#888" font-size="9">Higher variance</text>
+      <text x="522" y="195" text-anchor="middle" fill="#43E97B" font-size="9">+ Designed for ReLU</text>
+      <text x="522" y="210" text-anchor="middle" fill="#888" font-size="9">Accounts for ReLU</text>
+      <text x="522" y="225" text-anchor="middle" fill="#888" font-size="9">killing half the inputs</text>
+      <text x="522" y="255" text-anchor="middle" fill="#43E97B" font-size="10" font-weight="600">Standard for modern nets</text>
+      
+      <!-- GPT-style -->
+      <rect x="635" y="10" width="175" height="260" rx="14" fill="rgba(255,217,61,0.06)" stroke="#FFD93D" stroke-width="1.5"/>
+      <text x="722" y="35" text-anchor="middle" fill="#FFD93D" font-size="12" font-weight="700">GPT-Style</text>
+      <text x="722" y="50" text-anchor="middle" fill="#888" font-size="9">w ~ N(0, 0.02)</text>
+      <!-- Narrow bell curve -->
+      <path d="M670,150 Q690,147 705,130 Q715,105 722,80 Q730,105 740,130 Q755,147 775,150" fill="rgba(255,217,61,0.15)" stroke="#FFD93D" stroke-width="2"/>
+      <line x1="660" y1="150" x2="785" y2="150" stroke="#444" stroke-width="1"/>
+      <text x="722" y="145" text-anchor="middle" fill="#FFD93D" font-size="8">0</text>
+      <text x="722" y="175" text-anchor="middle" fill="#888" font-size="9">Very small &sigma; = 0.02</text>
+      <text x="722" y="195" text-anchor="middle" fill="#888" font-size="9">Residual connections</text>
+      <text x="722" y="210" text-anchor="middle" fill="#888" font-size="9">scaled by 1/&radic;N layers</text>
+      <text x="722" y="235" text-anchor="middle" fill="#FFD93D" font-size="9" font-weight="600">Used in GPT-2/3/4</text>
+      <text x="722" y="255" text-anchor="middle" fill="#FFD93D" font-size="9" font-weight="600">LLaMA, Mistral</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============== SLIDE 29: REGULARIZATION ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a0f2e 100%)">
+  <h2>Regularization &mdash; Preventing Overfitting</h2>
+  <p>Techniques that help the model <strong style="color:#43E97B">generalize</strong> instead of memorizing training data.</p>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg">
+      <!-- Dropout -->
+      <rect x="10" y="10" width="390" height="280" rx="14" fill="rgba(255,101,132,0.06)" stroke="#FF6584" stroke-width="1.5"/>
+      <text x="205" y="38" text-anchor="middle" fill="#FF6584" font-size="14" font-weight="700">Dropout (p=0.1 to 0.3)</text>
+      <text x="205" y="55" text-anchor="middle" fill="#888" font-size="10">Randomly "turn off" neurons during training</text>
+      
+      <!-- Before dropout -->
+      <text x="95" y="78" text-anchor="middle" fill="#888" font-size="10">Training (with dropout)</text>
+      <!-- Layer 1 -->
+      <circle cx="40" cy="110" r="12" fill="rgba(108,99,255,0.4)" stroke="#6C63FF" stroke-width="1.5"/>
+      <circle cx="40" cy="150" r="12" fill="rgba(108,99,255,0.4)" stroke="#6C63FF" stroke-width="1.5"/>
+      <circle cx="40" cy="190" r="12" fill="rgba(108,99,255,0.4)" stroke="#6C63FF" stroke-width="1.5"/>
+      <!-- Layer 2 - some crossed out -->
+      <circle cx="120" cy="100" r="12" fill="rgba(67,233,123,0.4)" stroke="#43E97B" stroke-width="1.5"/>
+      <circle cx="120" cy="140" r="12" fill="rgba(255,101,132,0.15)" stroke="#FF6584" stroke-width="1" stroke-dasharray="3 2"/>
+      <line x1="110" y1="130" x2="130" y2="150" stroke="#FF6584" stroke-width="2"/>
+      <line x1="130" y1="130" x2="110" y2="150" stroke="#FF6584" stroke-width="2"/>
+      <circle cx="120" cy="180" r="12" fill="rgba(67,233,123,0.4)" stroke="#43E97B" stroke-width="1.5"/>
+      <circle cx="120" cy="220" r="12" fill="rgba(255,101,132,0.15)" stroke="#FF6584" stroke-width="1" stroke-dasharray="3 2"/>
+      <line x1="110" y1="210" x2="130" y2="230" stroke="#FF6584" stroke-width="2"/>
+      <line x1="130" y1="210" x2="110" y2="230" stroke="#FF6584" stroke-width="2"/>
+      <!-- Connections (only to active) -->
+      <line x1="52" y1="110" x2="108" y2="100" stroke="#FFD93D" stroke-width="1.5" opacity="0.5"/>
+      <line x1="52" y1="150" x2="108" y2="180" stroke="#FFD93D" stroke-width="1.5" opacity="0.5"/>
+      <line x1="52" y1="190" x2="108" y2="180" stroke="#FFD93D" stroke-width="1.5" opacity="0.5"/>
+      
+      <text x="20" y="255" fill="#43E97B" font-size="9">Forces network to not rely on any single neuron</text>
+      <text x="20" y="272" fill="#ccc" font-size="9">Each forward pass uses a different "sub-network"</text>
+      
+      <!-- Inference side -->
+      <text x="305" y="78" text-anchor="middle" fill="#888" font-size="10">Inference (no dropout)</text>
+      <circle cx="250" cy="110" r="12" fill="rgba(108,99,255,0.4)" stroke="#6C63FF" stroke-width="1.5"/>
+      <circle cx="250" cy="150" r="12" fill="rgba(108,99,255,0.4)" stroke="#6C63FF" stroke-width="1.5"/>
+      <circle cx="250" cy="190" r="12" fill="rgba(108,99,255,0.4)" stroke="#6C63FF" stroke-width="1.5"/>
+      <circle cx="330" cy="100" r="12" fill="rgba(67,233,123,0.4)" stroke="#43E97B" stroke-width="1.5"/>
+      <circle cx="330" cy="140" r="12" fill="rgba(67,233,123,0.4)" stroke="#43E97B" stroke-width="1.5"/>
+      <circle cx="330" cy="180" r="12" fill="rgba(67,233,123,0.4)" stroke="#43E97B" stroke-width="1.5"/>
+      <circle cx="330" cy="220" r="12" fill="rgba(67,233,123,0.4)" stroke="#43E97B" stroke-width="1.5"/>
+      <line x1="262" y1="110" x2="318" y2="100" stroke="#FFD93D" stroke-width="1" opacity="0.4"/>
+      <line x1="262" y1="110" x2="318" y2="140" stroke="#FFD93D" stroke-width="1" opacity="0.4"/>
+      <line x1="262" y1="150" x2="318" y2="140" stroke="#FFD93D" stroke-width="1" opacity="0.4"/>
+      <line x1="262" y1="150" x2="318" y2="180" stroke="#FFD93D" stroke-width="1" opacity="0.4"/>
+      <line x1="262" y1="190" x2="318" y2="180" stroke="#FFD93D" stroke-width="1" opacity="0.4"/>
+      <line x1="262" y1="190" x2="318" y2="220" stroke="#FFD93D" stroke-width="1" opacity="0.4"/>
+      <text x="250" y="248" fill="#888" font-size="9">All neurons active</text>
+      <text x="250" y="263" fill="#888" font-size="9">Weights scaled by (1-p)</text>
+      
+      <!-- Weight Decay -->
+      <rect x="420" y="10" width="390" height="280" rx="14" fill="rgba(255,217,61,0.06)" stroke="#FFD93D" stroke-width="1.5"/>
+      <text x="615" y="38" text-anchor="middle" fill="#FFD93D" font-size="14" font-weight="700">Weight Decay (&lambda; = 0.01-0.1)</text>
+      <text x="615" y="55" text-anchor="middle" fill="#888" font-size="10">Penalize large weights to keep them small</text>
+      
+      <text x="440" y="80" fill="#ccc" font-size="10" font-family="'Fira Code', monospace">L_total = L_task + &lambda; &times; &Sigma;w&sup2;</text>
+      <text x="440" y="100" fill="#888" font-size="9">penalty grows with weight magnitude</text>
+      
+      <!-- Before/After comparison -->
+      <rect x="440" y="115" width="160" height="80" rx="8" fill="rgba(255,101,132,0.08)"/>
+      <text x="520" y="135" text-anchor="middle" fill="#FF6584" font-size="10" font-weight="600">Without Decay</text>
+      <!-- Large bars -->
+      <rect x="455" y="145" width="15" height="40" rx="2" fill="rgba(255,101,132,0.4)"/>
+      <rect x="475" y="150" width="15" height="35" rx="2" fill="rgba(255,101,132,0.4)"/>
+      <rect x="495" y="140" width="15" height="45" rx="2" fill="rgba(255,101,132,0.5)"/>
+      <rect x="515" y="148" width="15" height="37" rx="2" fill="rgba(255,101,132,0.4)"/>
+      <rect x="535" y="142" width="15" height="43" rx="2" fill="rgba(255,101,132,0.5)"/>
+      <rect x="555" y="155" width="15" height="30" rx="2" fill="rgba(255,101,132,0.3)"/>
+      <rect x="575" y="138" width="15" height="47" rx="2" fill="rgba(255,101,132,0.5)"/>
+      
+      <rect x="640" y="115" width="160" height="80" rx="8" fill="rgba(67,233,123,0.08)"/>
+      <text x="720" y="135" text-anchor="middle" fill="#43E97B" font-size="10" font-weight="600">With Decay</text>
+      <!-- Small bars -->
+      <rect x="655" y="170" width="15" height="15" rx="2" fill="rgba(67,233,123,0.4)"/>
+      <rect x="675" y="172" width="15" height="13" rx="2" fill="rgba(67,233,123,0.3)"/>
+      <rect x="695" y="168" width="15" height="17" rx="2" fill="rgba(67,233,123,0.4)"/>
+      <rect x="715" y="174" width="15" height="11" rx="2" fill="rgba(67,233,123,0.3)"/>
+      <rect x="735" y="170" width="15" height="15" rx="2" fill="rgba(67,233,123,0.4)"/>
+      <rect x="755" y="172" width="15" height="13" rx="2" fill="rgba(67,233,123,0.3)"/>
+      <rect x="775" y="169" width="15" height="16" rx="2" fill="rgba(67,233,123,0.4)"/>
+      
+      <text x="440" y="220" fill="#888" font-size="9">Other regularization in LLMs:</text>
+      <text x="440" y="240" fill="#ccc" font-size="9">&bull; <strong style="fill:#6C63FF">Layer Normalization</strong> &mdash; normalize activations per layer</text>
+      <text x="440" y="258" fill="#ccc" font-size="9">&bull; <strong style="fill:#FF6584">Label Smoothing</strong> &mdash; soften hard targets (0.9 vs 1.0)</text>
+      <text x="440" y="276" fill="#ccc" font-size="9">&bull; <strong style="fill:#43E97B">Data Augmentation</strong> &mdash; more diverse training data</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============== SLIDE 30: HNSW VECTOR INDEXING ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #0f1a2e 100%)">
+  <h2>Vector Indexing &mdash; How Search Stays Fast</h2>
+  <p>Brute-force search over millions of vectors is too slow. <strong style="color:#6C63FF">Approximate Nearest Neighbor (ANN)</strong> algorithms make it practical.</p>
+  <div class="two-col">
+    <div>
+      <h3 style="color:#43E97B; font-size:1em;">HNSW (Hierarchical Navigable Small World)</h3>
+      <div class="highlight-box">
+        <p><strong>Idea:</strong> Build a multi-layer graph. Top layers have few "highway" connections for fast navigation. Bottom layers have dense local connections for precision.</p>
+      </div>
+      <div style="margin-top:12px;">
+        <p style="font-size:0.75em;"><strong style="color:#FFD93D;">Search process:</strong></p>
+        <p style="font-size:0.7em; color:#aaa;">1. Start at top layer &rarr; greedy walk toward query</p>
+        <p style="font-size:0.7em; color:#aaa;">2. Drop to next layer &rarr; refine search</p>
+        <p style="font-size:0.7em; color:#aaa;">3. Bottom layer &rarr; find exact nearest neighbors</p>
+      </div>
+      <div style="margin-top:10px;">
+        <span class="tag tag-green">O(log N) search time</span>
+        <span class="tag tag-blue">Used by Chroma, Pinecone</span>
+      </div>
+    </div>
+    <div>
+      <div class="viz-container">
+        <svg viewBox="0 0 360 300" xmlns="http://www.w3.org/2000/svg">
+          <!-- Layer 2 (top) -->
+          <rect x="10" y="10" width="340" height="70" rx="10" fill="rgba(255,217,61,0.06)" stroke="rgba(255,217,61,0.2)" stroke-width="1"/>
+          <text x="30" y="30" fill="#FFD93D" font-size="10" font-weight="600">Layer 2 (sparse &mdash; highways)</text>
+          <circle cx="80" cy="55" r="8" fill="#FFD93D" opacity="0.6"/>
+          <circle cx="200" cy="50" r="8" fill="#FFD93D" opacity="0.6"/>
+          <circle cx="300" cy="55" r="8" fill="#FFD93D" opacity="0.6"/>
+          <line x1="88" y1="55" x2="192" y2="50" stroke="#FFD93D" stroke-width="1.5" opacity="0.4"/>
+          <line x1="208" y1="50" x2="292" y2="55" stroke="#FFD93D" stroke-width="1.5" opacity="0.4"/>
+          
+          <!-- Layer 1 (mid) -->
+          <rect x="10" y="95" width="340" height="80" rx="10" fill="rgba(108,99,255,0.06)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+          <text x="30" y="115" fill="#6C63FF" font-size="10" font-weight="600">Layer 1 (medium connections)</text>
+          <circle cx="60" cy="145" r="7" fill="#6C63FF" opacity="0.5"/>
+          <circle cx="120" cy="140" r="7" fill="#6C63FF" opacity="0.5"/>
+          <circle cx="180" cy="148" r="7" fill="#6C63FF" opacity="0.5"/>
+          <circle cx="240" cy="138" r="7" fill="#6C63FF" opacity="0.5"/>
+          <circle cx="300" cy="145" r="7" fill="#6C63FF" opacity="0.5"/>
+          <line x1="67" y1="145" x2="113" y2="140" stroke="#6C63FF" stroke-width="1" opacity="0.3"/>
+          <line x1="127" y1="140" x2="173" y2="148" stroke="#6C63FF" stroke-width="1" opacity="0.3"/>
+          <line x1="187" y1="148" x2="233" y2="138" stroke="#6C63FF" stroke-width="1" opacity="0.3"/>
+          <line x1="247" y1="138" x2="293" y2="145" stroke="#6C63FF" stroke-width="1" opacity="0.3"/>
+          
+          <!-- Layer 0 (bottom, dense) -->
+          <rect x="10" y="190" width="340" height="100" rx="10" fill="rgba(67,233,123,0.06)" stroke="rgba(67,233,123,0.2)" stroke-width="1"/>
+          <text x="30" y="210" fill="#43E97B" font-size="10" font-weight="600">Layer 0 (dense &mdash; all vectors)</text>
+          <!-- Many dots -->
+          <circle cx="40" cy="245" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="65" cy="250" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="85" cy="240" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="110" cy="248" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="130" cy="238" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="155" cy="250" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="175" cy="242" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="200" cy="252" r="5" fill="#43E97B" opacity="0.5"/>
+          <circle cx="220" cy="240" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="245" cy="248" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="265" cy="238" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="290" cy="250" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="310" cy="242" r="5" fill="#43E97B" opacity="0.3"/>
+          <circle cx="335" cy="248" r="5" fill="#43E97B" opacity="0.3"/>
+          
+          <!-- Search path -->
+          <path d="M80,55 L80,55 L200,50 L200,50" fill="none" stroke="#FF6584" stroke-width="2" stroke-dasharray="4 3"/>
+          <path d="M200,50 L180,148" fill="none" stroke="#FF6584" stroke-width="2" stroke-dasharray="4 3"/>
+          <path d="M180,148 L200,252" fill="none" stroke="#FF6584" stroke-width="2" stroke-dasharray="4 3"/>
+          <circle cx="200" cy="252" r="8" fill="none" stroke="#FF6584" stroke-width="2"/>
+          <text x="215" y="270" fill="#FF6584" font-size="9" font-weight="600">Found!</text>
+          
+          <!-- Query -->
+          <circle cx="80" cy="55" r="10" fill="none" stroke="#FF6584" stroke-width="2"/>
+          <text x="95" y="48" fill="#FF6584" font-size="8">query</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 31: CHUNKING STRATEGIES ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #0f2e1a 100%)">
+  <h2>Chunking Strategies for RAG</h2>
+  <p>How you split documents affects retrieval quality. <strong style="color:#FFD93D">Too big</strong> = noise. <strong style="color:#FF6584">Too small</strong> = lost context.</p>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 290" xmlns="http://www.w3.org/2000/svg">
+      <!-- Fixed Size -->
+      <rect x="10" y="10" width="250" height="270" rx="14" fill="rgba(108,99,255,0.06)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+      <text x="135" y="35" text-anchor="middle" fill="#6C63FF" font-size="12" font-weight="700">Fixed-Size Chunks</text>
+      <text x="135" y="52" text-anchor="middle" fill="#888" font-size="9">chunk_size=500, overlap=50</text>
+      <!-- Blocks -->
+      <rect x="25" y="65" width="220" height="30" rx="6" fill="rgba(108,99,255,0.15)"/>
+      <text x="135" y="84" text-anchor="middle" fill="#ccc" font-size="9">Chunk 1: tokens 0-499</text>
+      <rect x="25" y="100" width="220" height="30" rx="6" fill="rgba(108,99,255,0.12)"/>
+      <text x="135" y="119" text-anchor="middle" fill="#ccc" font-size="9">Chunk 2: tokens 450-949</text>
+      <rect x="25" y="135" width="220" height="30" rx="6" fill="rgba(108,99,255,0.15)"/>
+      <text x="135" y="154" text-anchor="middle" fill="#ccc" font-size="9">Chunk 3: tokens 900-1399</text>
+      <!-- Overlap indicator -->
+      <rect x="25" y="96" width="220" height="8" rx="2" fill="rgba(255,217,61,0.3)"/>
+      <text x="135" y="180" text-anchor="middle" fill="#FFD93D" font-size="8">&uarr; overlap preserves context at boundaries</text>
+      
+      <text x="25" y="205" fill="#43E97B" font-size="9">+ Simple, predictable size</text>
+      <text x="25" y="220" fill="#FF6584" font-size="9">- May split mid-sentence</text>
+      <text x="25" y="240" fill="#888" font-size="9" font-weight="600">Best for: uniform docs</text>
+      <text x="25" y="265" fill="#888" font-size="9">Used by: LangChain default</text>
+      
+      <!-- Recursive -->
+      <rect x="280" y="10" width="250" height="270" rx="14" fill="rgba(67,233,123,0.06)" stroke="rgba(67,233,123,0.3)" stroke-width="2"/>
+      <text x="405" y="35" text-anchor="middle" fill="#43E97B" font-size="12" font-weight="700">Recursive Splitting</text>
+      <text x="405" y="52" text-anchor="middle" fill="#888" font-size="9">Split by: \n\n &rarr; \n &rarr; . &rarr; space</text>
+      <!-- Hierarchical blocks -->
+      <rect x="295" y="65" width="220" height="35" rx="6" fill="rgba(67,233,123,0.15)"/>
+      <text x="405" y="80" text-anchor="middle" fill="#ccc" font-size="9">Paragraph 1 (complete)</text>
+      <text x="405" y="93" text-anchor="middle" fill="#888" font-size="7">split on \n\n</text>
+      <rect x="295" y="108" width="220" height="45" rx="6" fill="rgba(67,233,123,0.12)"/>
+      <text x="405" y="125" text-anchor="middle" fill="#ccc" font-size="9">Paragraph 2 (too long, split on \n)</text>
+      <text x="405" y="140" text-anchor="middle" fill="#888" font-size="7">falls back to sentence split</text>
+      <rect x="295" y="160" width="220" height="30" rx="6" fill="rgba(67,233,123,0.15)"/>
+      <text x="405" y="179" text-anchor="middle" fill="#ccc" font-size="9">Paragraph 3 (complete)</text>
+      
+      <text x="295" y="210" fill="#43E97B" font-size="9">+ Respects document structure</text>
+      <text x="295" y="225" fill="#43E97B" font-size="9">+ Keeps sentences intact</text>
+      <text x="295" y="245" fill="#888" font-size="9" font-weight="600">Best for: general text, articles</text>
+      <text x="295" y="265" fill="#FFD93D" font-size="9" font-weight="600">Most recommended approach!</text>
+      
+      <!-- Semantic -->
+      <rect x="550" y="10" width="260" height="270" rx="14" fill="rgba(255,217,61,0.06)" stroke="rgba(255,217,61,0.2)" stroke-width="1"/>
+      <text x="680" y="35" text-anchor="middle" fill="#FFD93D" font-size="12" font-weight="700">Semantic Chunking</text>
+      <text x="680" y="52" text-anchor="middle" fill="#888" font-size="9">Split when topic changes</text>
+      <!-- Topic blocks -->
+      <rect x="565" y="65" width="230" height="35" rx="6" fill="rgba(108,99,255,0.15)"/>
+      <text x="680" y="80" text-anchor="middle" fill="#6C63FF" font-size="9">Topic A: "AI in Healthcare"</text>
+      <text x="680" y="93" text-anchor="middle" fill="#888" font-size="7">similarity between sentences &gt; threshold</text>
+      <rect x="565" y="108" width="230" height="35" rx="6" fill="rgba(255,101,132,0.15)"/>
+      <text x="680" y="123" text-anchor="middle" fill="#FF6584" font-size="9">Topic B: "Drug Discovery"</text>
+      <text x="680" y="136" text-anchor="middle" fill="#888" font-size="7">semantic shift detected</text>
+      <rect x="565" y="150" width="230" height="35" rx="6" fill="rgba(67,233,123,0.15)"/>
+      <text x="680" y="165" text-anchor="middle" fill="#43E97B" font-size="9">Topic C: "Clinical Trials"</text>
+      <text x="680" y="178" text-anchor="middle" fill="#888" font-size="7">embedding similarity drops</text>
+      
+      <text x="565" y="210" fill="#43E97B" font-size="9">+ Topic-coherent chunks</text>
+      <text x="565" y="225" fill="#FF6584" font-size="9">- Requires embedding model</text>
+      <text x="565" y="240" fill="#FF6584" font-size="9">- Slower &amp; more complex</text>
+      <text x="565" y="265" fill="#888" font-size="9" font-weight="600">Best for: mixed-topic documents</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============== SLIDE 32: FINE-TUNING METHODS ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a0f2e 100%)">
+  <h2>Fine-Tuning &mdash; Adapting Pre-trained LLMs</h2>
+  <p>You don't retrain from scratch. You <strong style="color:#43E97B">adapt</strong> existing knowledge to your domain.</p>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 310" xmlns="http://www.w3.org/2000/svg">
+      <!-- Full Fine-Tuning -->
+      <rect x="10" y="10" width="190" height="290" rx="14" fill="rgba(255,101,132,0.06)" stroke="#FF6584" stroke-width="1.5"/>
+      <text x="105" y="38" text-anchor="middle" fill="#FF6584" font-size="12" font-weight="700">Full Fine-Tuning</text>
+      <!-- All layers colored -->
+      <rect x="30" y="55" width="150" height="18" rx="4" fill="rgba(255,101,132,0.3)"/><text x="105" y="68" text-anchor="middle" fill="#fff" font-size="8">Layer 1 (update all)</text>
+      <rect x="30" y="78" width="150" height="18" rx="4" fill="rgba(255,101,132,0.3)"/><text x="105" y="91" text-anchor="middle" fill="#fff" font-size="8">Layer 2 (update all)</text>
+      <rect x="30" y="101" width="150" height="18" rx="4" fill="rgba(255,101,132,0.3)"/><text x="105" y="114" text-anchor="middle" fill="#fff" font-size="8">...</text>
+      <rect x="30" y="124" width="150" height="18" rx="4" fill="rgba(255,101,132,0.3)"/><text x="105" y="137" text-anchor="middle" fill="#fff" font-size="8">Layer 96 (update all)</text>
+      
+      <text x="25" y="170" fill="#ccc" font-size="9">Update ALL 175B parameters</text>
+      <text x="25" y="190" fill="#FF6584" font-size="9">Memory: ~350 GB (FP16)</text>
+      <text x="25" y="208" fill="#FF6584" font-size="9">GPUs: 8x A100 80GB</text>
+      <text x="25" y="230" fill="#43E97B" font-size="9">+ Best performance</text>
+      <text x="25" y="248" fill="#FF6584" font-size="9">- Extremely expensive</text>
+      <text x="25" y="266" fill="#FF6584" font-size="9">- Risk of catastrophic forgetting</text>
+      <text x="25" y="290" fill="#888" font-size="9">Cost: $10K - $1M+</text>
+      
+      <!-- LoRA -->
+      <rect x="215" y="10" width="200" height="290" rx="14" fill="rgba(67,233,123,0.06)" stroke="#43E97B" stroke-width="2"/>
+      <text x="315" y="38" text-anchor="middle" fill="#43E97B" font-size="12" font-weight="700">LoRA (Low-Rank Adaptation)</text>
+      <!-- Layers with small adapters -->
+      <rect x="235" y="55" width="150" height="18" rx="4" fill="rgba(108,99,255,0.15)"/><text x="310" y="68" text-anchor="middle" fill="#888" font-size="8">Layer 1 (frozen)</text>
+      <rect x="390" y="55" width="15" height="18" rx="3" fill="rgba(67,233,123,0.5)"/>
+      <rect x="235" y="78" width="150" height="18" rx="4" fill="rgba(108,99,255,0.15)"/><text x="310" y="91" text-anchor="middle" fill="#888" font-size="8">Layer 2 (frozen)</text>
+      <rect x="390" y="78" width="15" height="18" rx="3" fill="rgba(67,233,123,0.5)"/>
+      <rect x="235" y="101" width="150" height="18" rx="4" fill="rgba(108,99,255,0.15)"/><text x="310" y="114" text-anchor="middle" fill="#888" font-size="8">...</text>
+      <rect x="390" y="101" width="15" height="18" rx="3" fill="rgba(67,233,123,0.5)"/>
+      <rect x="235" y="124" width="150" height="18" rx="4" fill="rgba(108,99,255,0.15)"/><text x="310" y="137" text-anchor="middle" fill="#888" font-size="8">Layer 96 (frozen)</text>
+      <rect x="390" y="124" width="15" height="18" rx="3" fill="rgba(67,233,123,0.5)"/>
+      
+      <text x="225" y="165" fill="#43E97B" font-size="9">Tiny adapter matrices (rank 8-64)</text>
+      <text x="225" y="183" fill="#ccc" font-size="9">W = W_frozen + A &times; B</text>
+      <text x="225" y="198" fill="#888" font-size="8">(A: d&times;r, B: r&times;d where r &lt;&lt; d)</text>
+      <text x="225" y="218" fill="#43E97B" font-size="9">Trainable: ~0.1% of params</text>
+      <text x="225" y="236" fill="#43E97B" font-size="9">Memory: 1 GPU (16-24 GB)</text>
+      <text x="225" y="258" fill="#43E97B" font-size="9">+ 1000x fewer params to train</text>
+      <text x="225" y="276" fill="#43E97B" font-size="9">+ Near full-FT performance</text>
+      <text x="225" y="294" fill="#FFD93D" font-size="9" font-weight="600">Cost: $10 - $100</text>
+      
+      <!-- QLoRA -->
+      <rect x="430" y="10" width="195" height="290" rx="14" fill="rgba(255,217,61,0.06)" stroke="#FFD93D" stroke-width="1.5"/>
+      <text x="527" y="38" text-anchor="middle" fill="#FFD93D" font-size="12" font-weight="700">QLoRA (Quantized LoRA)</text>
+      <!-- Quantized layers -->
+      <rect x="450" y="55" width="150" height="18" rx="4" fill="rgba(255,217,61,0.1)"/><text x="525" y="68" text-anchor="middle" fill="#888" font-size="8">Layer 1 (4-bit frozen)</text>
+      <rect x="605" y="55" width="10" height="18" rx="3" fill="rgba(67,233,123,0.5)"/>
+      <rect x="450" y="78" width="150" height="18" rx="4" fill="rgba(255,217,61,0.1)"/><text x="525" y="91" text-anchor="middle" fill="#888" font-size="8">Layer 2 (4-bit frozen)</text>
+      <rect x="605" y="78" width="10" height="18" rx="3" fill="rgba(67,233,123,0.5)"/>
+      <rect x="450" y="101" width="150" height="18" rx="4" fill="rgba(255,217,61,0.1)"/><text x="525" y="114" text-anchor="middle" fill="#888" font-size="8">...</text>
+      <rect x="605" y="101" width="10" height="18" rx="3" fill="rgba(67,233,123,0.5)"/>
+      <rect x="450" y="124" width="150" height="18" rx="4" fill="rgba(255,217,61,0.1)"/><text x="525" y="137" text-anchor="middle" fill="#888" font-size="8">Layer 96 (4-bit frozen)</text>
+      <rect x="605" y="124" width="10" height="18" rx="3" fill="rgba(67,233,123,0.5)"/>
+      
+      <text x="440" y="165" fill="#FFD93D" font-size="9">LoRA + 4-bit quantization</text>
+      <text x="440" y="183" fill="#ccc" font-size="9">NF4 (Normal Float 4-bit)</text>
+      <text x="440" y="198" fill="#888" font-size="8">16-bit &rarr; 4-bit = 4x compression</text>
+      <text x="440" y="218" fill="#43E97B" font-size="9">Fine-tune 70B on 1 GPU!</text>
+      <text x="440" y="236" fill="#43E97B" font-size="9">Memory: ~24 GB VRAM</text>
+      <text x="440" y="258" fill="#43E97B" font-size="9">+ Cheapest option</text>
+      <text x="440" y="276" fill="#FF6584" font-size="9">- Slight quality loss</text>
+      <text x="440" y="294" fill="#FFD93D" font-size="9" font-weight="600">Cost: $1 - $10</text>
+      
+      <!-- RLHF box -->
+      <rect x="640" y="10" width="170" height="290" rx="14" fill="rgba(108,99,255,0.06)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+      <text x="725" y="38" text-anchor="middle" fill="#6C63FF" font-size="12" font-weight="700">RLHF</text>
+      <text x="725" y="55" text-anchor="middle" fill="#888" font-size="8">Reinforcement Learning from</text>
+      <text x="725" y="67" text-anchor="middle" fill="#888" font-size="8">Human Feedback</text>
+      
+      <text x="655" y="95" fill="#ccc" font-size="9">1. Train reward model</text>
+      <text x="655" y="110" fill="#888" font-size="8">&nbsp;&nbsp;from human preferences</text>
+      <text x="655" y="130" fill="#ccc" font-size="9">2. PPO optimization</text>
+      <text x="655" y="145" fill="#888" font-size="8">&nbsp;&nbsp;maximize reward signal</text>
+      <text x="655" y="165" fill="#ccc" font-size="9">3. KL divergence penalty</text>
+      <text x="655" y="180" fill="#888" font-size="8">&nbsp;&nbsp;don't drift too far</text>
+      
+      <text x="655" y="210" fill="#888" font-size="9">Makes LLMs:</text>
+      <text x="655" y="228" fill="#43E97B" font-size="9">&bull; Helpful</text>
+      <text x="655" y="246" fill="#43E97B" font-size="9">&bull; Harmless</text>
+      <text x="655" y="264" fill="#43E97B" font-size="9">&bull; Honest</text>
+      <text x="655" y="288" fill="#6C63FF" font-size="9" font-weight="600">Used by ChatGPT, Claude</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============== SLIDE 33: INFERENCE & SAMPLING ============== -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a0f2e 100%)">
+  <h2>Inference &mdash; How LLMs Generate Text</h2>
+  <p>At generation time, several <strong style="color:#FFD93D">sampling strategies</strong> control creativity vs determinism.</p>
+  <div class="viz-container">
+    <svg viewBox="0 0 820 320" xmlns="http://www.w3.org/2000/svg">
+      <!-- Temperature -->
+      <rect x="10" y="10" width="260" height="300" rx="14" fill="rgba(255,101,132,0.06)" stroke="#FF6584" stroke-width="1.5"/>
+      <text x="140" y="38" text-anchor="middle" fill="#FF6584" font-size="14" font-weight="700">Temperature</text>
+      <text x="140" y="55" text-anchor="middle" fill="#888" font-size="9">Controls randomness of predictions</text>
+      
+      <!-- T=0.1 (sharp) -->
+      <text x="25" y="78" fill="#6C63FF" font-size="10" font-weight="600">T=0.1 (deterministic)</text>
+      <rect x="25" y="85" width="130" height="14" rx="3" fill="rgba(108,99,255,0.5)"/><text x="160" y="95" fill="#ccc" font-size="8">"the" 89%</text>
+      <rect x="25" y="102" width="20" height="14" rx="3" fill="rgba(108,99,255,0.2)"/><text x="160" y="112" fill="#888" font-size="8">"a" 5%</text>
+      <rect x="25" y="119" width="10" height="14" rx="3" fill="rgba(108,99,255,0.1)"/><text x="160" y="129" fill="#888" font-size="8">others ~6%</text>
+      
+      <!-- T=1.0 (normal) -->
+      <text x="25" y="155" fill="#FFD93D" font-size="10" font-weight="600">T=1.0 (balanced)</text>
+      <rect x="25" y="162" width="80" height="14" rx="3" fill="rgba(255,217,61,0.4)"/><text x="160" y="172" fill="#ccc" font-size="8">"the" 45%</text>
+      <rect x="25" y="179" width="45" height="14" rx="3" fill="rgba(255,217,61,0.3)"/><text x="160" y="189" fill="#888" font-size="8">"a" 25%</text>
+      <rect x="25" y="196" width="30" height="14" rx="3" fill="rgba(255,217,61,0.2)"/><text x="160" y="206" fill="#888" font-size="8">"this" 15%</text>
+      
+      <!-- T=2.0 (flat) -->
+      <text x="25" y="232" fill="#FF6584" font-size="10" font-weight="600">T=2.0 (creative/chaotic)</text>
+      <rect x="25" y="239" width="40" height="14" rx="3" fill="rgba(255,101,132,0.3)"/><text x="160" y="249" fill="#ccc" font-size="8">"the" 22%</text>
+      <rect x="25" y="256" width="35" height="14" rx="3" fill="rgba(255,101,132,0.25)"/><text x="160" y="266" fill="#888" font-size="8">"a" 18%</text>
+      <rect x="25" y="273" width="30" height="14" rx="3" fill="rgba(255,101,132,0.2)"/><text x="160" y="283" fill="#888" font-size="8">"purple" 12%</text>
+      <text x="25" y="300" fill="#888" font-size="8">p_i = softmax(logit_i / T)</text>
+      
+      <!-- Top-K -->
+      <rect x="285" y="10" width="250" height="300" rx="14" fill="rgba(67,233,123,0.06)" stroke="#43E97B" stroke-width="1.5"/>
+      <text x="410" y="38" text-anchor="middle" fill="#43E97B" font-size="14" font-weight="700">Top-K Sampling</text>
+      <text x="410" y="55" text-anchor="middle" fill="#888" font-size="9">Only consider the K most likely tokens</text>
+      
+      <!-- All tokens -->
+      <text x="300" y="78" fill="#888" font-size="9">All vocab probabilities:</text>
+      <rect x="300" y="85" width="90" height="12" rx="2" fill="rgba(67,233,123,0.4)"/><text x="395" y="95" fill="#ccc" font-size="8">"the" 35%</text>
+      <rect x="300" y="100" width="55" height="12" rx="2" fill="rgba(67,233,123,0.3)"/><text x="395" y="110" fill="#ccc" font-size="8">"a" 20%</text>
+      <rect x="300" y="115" width="40" height="12" rx="2" fill="rgba(67,233,123,0.2)"/><text x="395" y="125" fill="#ccc" font-size="8">"this" 15%</text>
+      <rect x="300" y="130" width="25" height="12" rx="2" fill="rgba(255,101,132,0.2)"/><text x="395" y="140" fill="#888" font-size="8">"an" 8%</text>
+      <rect x="300" y="145" width="15" height="12" rx="2" fill="rgba(255,101,132,0.15)"/><text x="395" y="155" fill="#888" font-size="8">"every" 4%</text>
+      <rect x="300" y="160" width="8" height="12" rx="2" fill="rgba(255,101,132,0.1)"/><text x="395" y="170" fill="#888" font-size="8">"..." 18%</text>
+      
+      <!-- K=3 cutoff -->
+      <line x1="295" y1="129" x2="520" y2="129" stroke="#FF6584" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="460" y="126" fill="#FF6584" font-size="9" font-weight="600">K=3 cutoff</text>
+      
+      <text x="300" y="200" fill="#43E97B" font-size="9">After Top-3 filtering:</text>
+      <rect x="300" y="208" width="105" height="14" rx="3" fill="rgba(67,233,123,0.4)"/><text x="410" y="218" fill="#ccc" font-size="8">"the" 50%</text>
+      <rect x="300" y="225" width="65" height="14" rx="3" fill="rgba(67,233,123,0.3)"/><text x="410" y="235" fill="#ccc" font-size="8">"a" 29%</text>
+      <rect x="300" y="242" width="45" height="14" rx="3" fill="rgba(67,233,123,0.2)"/><text x="410" y="252" fill="#ccc" font-size="8">"this" 21%</text>
+      <text x="300" y="278" fill="#888" font-size="8">Probabilities renormalized to sum=1</text>
+      <text x="300" y="296" fill="#888" font-size="8">Typical: K = 40-100</text>
+      
+      <!-- Top-P (Nucleus) -->
+      <rect x="550" y="10" width="260" height="300" rx="14" fill="rgba(255,217,61,0.06)" stroke="#FFD93D" stroke-width="1.5"/>
+      <text x="680" y="38" text-anchor="middle" fill="#FFD93D" font-size="14" font-weight="700">Top-P (Nucleus) Sampling</text>
+      <text x="680" y="55" text-anchor="middle" fill="#888" font-size="9">Include tokens until cumulative prob &ge; P</text>
+      
+      <text x="565" y="78" fill="#888" font-size="9">Cumulative distribution:</text>
+      <rect x="565" y="85" width="90" height="12" rx="2" fill="rgba(255,217,61,0.4)"/><text x="665" y="95" fill="#ccc" font-size="8">"the" 35% (cum: 35%)</text>
+      <rect x="565" y="100" width="55" height="12" rx="2" fill="rgba(255,217,61,0.3)"/><text x="665" y="110" fill="#ccc" font-size="8">"a" 20% (cum: 55%)</text>
+      <rect x="565" y="115" width="40" height="12" rx="2" fill="rgba(255,217,61,0.2)"/><text x="665" y="125" fill="#ccc" font-size="8">"this" 15% (cum: 70%)</text>
+      <rect x="565" y="130" width="25" height="12" rx="2" fill="rgba(255,217,61,0.15)"/><text x="665" y="140" fill="#ccc" font-size="8">"an" 8% (cum: 78%)</text>
+      <rect x="565" y="145" width="15" height="12" rx="2" fill="rgba(255,217,61,0.1)"/><text x="665" y="155" fill="#ccc" font-size="8">"every" 4% (cum: 82%)</text>
+      
+      <!-- P=0.8 cutoff -->
+      <line x1="560" y1="142" x2="795" y2="142" stroke="#FF6584" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="740" y="140" fill="#FF6584" font-size="9" font-weight="600">P=0.8 cutoff</text>
+      
+      <text x="565" y="185" fill="#FFD93D" font-size="9">Adaptive! Includes:</text>
+      <text x="565" y="203" fill="#ccc" font-size="9">&bull; Few tokens when confident</text>
+      <text x="565" y="220" fill="#ccc" font-size="9">&bull; Many tokens when uncertain</text>
+      
+      <rect x="565" y="240" width="230" height="55" rx="8" fill="rgba(255,255,255,0.03)"/>
+      <text x="680" y="258" text-anchor="middle" fill="#FFD93D" font-size="10" font-weight="600">Common Defaults</text>
+      <text x="575" y="275" fill="#ccc" font-size="9">ChatGPT: T=0.7, top_p=1.0</text>
+      <text x="575" y="290" fill="#ccc" font-size="9">Code gen: T=0.0 (greedy)</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============== SLIDE 34: PUTTING IT ALL TOGETHER ============== -->
 <section data-background-gradient="linear-gradient(135deg, #0a0a1a 0%, #1a1a0f 100%)">
   <h2>Putting It All Together</h2>
   <div class="viz-container">
