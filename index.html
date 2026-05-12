@@ -189,6 +189,12 @@
   <h1>Generative AI<br>LangChain + RAG</h1>
   <p class="subtitle">LLMs, Embeddings, Vector Databases &amp; Parameter Training</p>
   <div class="week-badge">Phase 3 &mdash; Weeks 7-9</div>
+  <aside class="notes">
+    Welcome everyone to Phase 3 of our AI/ML learning path. Over the next 3 weeks, we'll dive deep into Generative AI.
+    We'll cover how Large Language Models work under the hood, how their billions of parameters are trained,
+    what embeddings and vector databases are, and how RAG and LangChain bring it all together into real applications.
+    By the end, you'll understand the full stack from raw text to intelligent AI-powered apps.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 2: AGENDA ============== -->
@@ -220,6 +226,13 @@
       <p>Building production-ready AI applications with chains and agents</p>
     </div>
   </div>
+  <aside class="notes">
+    Here's our roadmap for this phase. We start with LLMs — understanding the transformer architecture that powers GPT, Claude, and LLaMA.
+    Then we go deep into parameters — the billions of numbers that make these models "intelligent" — and exactly how they're trained through gradient descent.
+    Next, embeddings: how we convert human language into mathematical vectors. Vector databases like Chroma and Pinecone store and search these vectors.
+    RAG combines retrieval with generation to ground LLM responses in factual data. And LangChain is the framework that orchestrates all of this.
+    Let's begin!
+  </aside>
 </section>
 
 <!-- ============== SLIDE 3: WHAT IS AN LLM ============== -->
@@ -272,6 +285,14 @@
       </div>
     </div>
   </div>
+  <aside class="notes">
+    At its core, an LLM is a next-token predictor. You feed it a sequence of words, and it predicts the most likely next word.
+    "The cat sat on the" — the model considers every word in its vocabulary and assigns a probability.
+    "the" gets 92%, "a" maybe 3%, "his" maybe 2%. It samples from this distribution to generate text.
+    This is fundamentally how ChatGPT, Claude, and every LLM works — just next-token prediction, but done with incredible sophistication.
+    The models shown here — GPT-4, LLaMA, Claude, Gemini — all use the same underlying transformer architecture, which we'll see next.
+    The diagram on the right shows the high-level flow: tokens go in, pass through the transformer, probabilities come out.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 4: TRANSFORMER ARCHITECTURE ============== -->
@@ -367,6 +388,17 @@
       <text x="520" y="295" text-anchor="middle" fill="#777" font-size="10">Each head learns different relationships between tokens</text>
     </svg>
   </div>
+  <aside class="notes">
+    The Transformer was introduced in the landmark 2017 paper "Attention Is All You Need" by Vaswani et al.
+    On the left, you see the core building block: Input Embedding with positional encoding feeds into Multi-Head Self-Attention,
+    then through Add & LayerNorm, a Feed-Forward network, and another Add & LayerNorm. This block is repeated N times — GPT-3 has 96 of these layers.
+    The key innovation is Self-Attention. On the right, you see how it works:
+    Each token creates three vectors: Query (what am I looking for?), Key (what do I contain?), and Value (what info do I carry?).
+    We multiply Q times K-transpose to get attention scores — how much each token should attend to every other token.
+    We scale by square root of dimension to prevent exploding values, apply softmax to normalize, then multiply by V.
+    The formula at the bottom is the most important equation in modern AI. Multi-head means we do this 8, 16, or even 128 times in parallel,
+    each head learning different types of relationships — one head might learn syntax, another semantics, another coreference.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 5: WHAT ARE PARAMETERS ============== -->
@@ -397,6 +429,15 @@
       </div>
     </div>
   </div>
+  <aside class="notes">
+    Now let's talk about parameters — the actual "knowledge" inside a neural network.
+    Parameters are just numbers — weights and biases — that get adjusted during training.
+    Think of them as millions of tiny knobs on a mixing board. Training is the process of finding the right setting for each knob.
+    The scale is staggering: GPT-3 has 175 billion parameters. GPT-4 is estimated at 1.8 trillion.
+    Even the open-source LLaMA 2 has 70 billion in its largest variant.
+    Each parameter is typically stored as a 16-bit floating point number, so GPT-3 alone takes about 350 GB just for the weights.
+    Every connection between neurons has a weight, and every neuron has a bias. Together, they encode everything the model has learned about language.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 6: PARAMETER TYPES VISUAL ============== -->
@@ -465,6 +506,16 @@
       <text x="540" y="252" fill="#777" font-size="9">W = weights, b = bias, &sigma; = activation</text>
     </svg>
   </div>
+  <aside class="notes">
+    Let's look at the two types of parameters:
+    WEIGHTS are the numbers on the connections between neurons. When data flows from one neuron to another, it gets multiplied by the weight.
+    A weight of 0.5 means "pass half the signal." A weight of -0.3 means "pass 30% of the signal, but flip its sign."
+    BIASES are added after the weighted sum. They shift the activation threshold — think of it as "how easily does this neuron fire?"
+    The fundamental equation is y = sigma(Wx + b). W is the weight matrix, x is the input, b is the bias, and sigma is an activation function.
+    In the diagram, you can see three input neurons (x1, x2, x3) connected to two hidden neurons (h1, h2) via weighted connections (shown in yellow).
+    Each connection has a weight like w1=0.5 or w4=0.8. The hidden neurons combine these weighted inputs, add a bias, and apply an activation function.
+    In a real LLM, this happens across billions of connections simultaneously.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 7: TRAINING OVERVIEW ============== -->
@@ -534,6 +585,17 @@
       <text x="395" y="290" text-anchor="middle" fill="#FFD93D" font-size="12" font-weight="600">Repeat millions of times until loss is minimized</text>
     </svg>
   </div>
+  <aside class="notes">
+    Training is a 3-step loop that repeats millions or billions of times:
+    Step 1 — FORWARD PASS: Input data flows through the network. Each neuron multiplies inputs by weights, adds bias, applies activation.
+    The data propagates layer by layer until we get an output — a prediction.
+    Step 2 — COMPUTE LOSS: We compare our prediction to the correct answer. The loss function quantifies how wrong we are.
+    For example, if we predicted "dog" but the answer was "cat", the loss is high. If we predicted "cat" correctly, the loss is low.
+    Step 3 — BACKPROPAGATION: This is the magic. We calculate how much each parameter contributed to the error, working backwards from output to input.
+    Using calculus (the chain rule), we compute gradients — the direction each parameter should change to reduce the error.
+    Then we adjust each parameter slightly in that direction. The yellow loop arrow shows this repeats endlessly.
+    For GPT-3, this loop ran for 300 billion tokens — that's roughly the text of 750 million books.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 8: GRADIENT DESCENT VISUALIZATION ============== -->
@@ -603,6 +665,18 @@
       </div>
     </div>
   </div>
+  <aside class="notes">
+    Gradient descent is like rolling a ball downhill in the dark. You can't see the valley, but you can feel the slope under your feet.
+    The gradient tells you which direction is "uphill" — the direction that increases the loss.
+    We want to DECREASE loss, so we go in the OPPOSITE direction of the gradient.
+    The update rule is beautifully simple: new_weight = old_weight minus learning_rate times gradient.
+    The learning rate controls step size — too big and you overshoot, too small and you take forever.
+    In the animation on the right, watch the red ball roll down the loss curve. Each step, it moves closer to the minimum.
+    The steps get smaller near the bottom because the gradient (slope) gets flatter.
+    The global minimum is where the loss is lowest — that's our goal. But in practice with billions of parameters,
+    the loss landscape is incredibly high-dimensional and complex, with many local minima and saddle points.
+    Modern optimizers like Adam help navigate this landscape effectively.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 9: TRAINING LOSS CURVE ============== -->
@@ -668,6 +742,17 @@
     <span class="tag tag-blue">Epoch 10: Loss = 1.5</span>
     <span class="tag tag-green">Epoch 50: Loss = 0.3</span>
   </div>
+  <aside class="notes">
+    This chart shows what training actually looks like over time. The X-axis is training steps (iterations), the Y-axis is loss.
+    The solid red line is training loss — how well the model fits the training data.
+    The dashed blue line is validation loss — how well it performs on unseen data. This is the one we really care about.
+    Notice three distinct phases: First, RAPID LEARNING — the loss drops dramatically in the early steps.
+    The model quickly learns basic patterns like common words and simple grammar.
+    Second, FINE-TUNING — the loss decreases more slowly as the model learns subtler patterns, idioms, and reasoning.
+    Third, CONVERGENCE — the loss plateaus. The model has extracted most learnable patterns from the data.
+    If training loss keeps dropping but validation loss starts rising, that's OVERFITTING — the model memorizes training data instead of learning general patterns.
+    The tags at the bottom show typical loss values: 4.2 at epoch 1, 1.5 at epoch 10, and 0.3 at epoch 50.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 10: LEARNING RATE ============== -->
@@ -711,6 +796,17 @@
       <text x="660" y="250" text-anchor="middle" fill="#FF6584" font-size="10" font-weight="600">Never converges!</text>
     </svg>
   </div>
+  <aside class="notes">
+    The learning rate is arguably THE most important hyperparameter in deep learning.
+    LEFT: Learning rate too small (0.0001). The ball takes tiny baby steps. It WILL eventually reach the minimum, but it could take weeks or months.
+    In practice, you'd run out of compute budget before it converges. Training costs money — GPU hours add up fast.
+    CENTER: Learning rate just right (0.001). Smooth, efficient convergence. The ball takes reasonable steps, steadily approaching the minimum.
+    This is what we aim for. In practice, we often use learning rate schedules that start higher and decrease over time — warm up then decay.
+    RIGHT: Learning rate too large (0.1). The ball overshoots the minimum, bouncing back and forth wildly.
+    It may never converge — the loss might even INCREASE over time. This is catastrophic.
+    Finding the right learning rate is part science, part art. Common techniques include learning rate warmup, cosine decay schedules,
+    and the learning rate finder test. For LLMs, a peak learning rate around 3e-4 with warmup and cosine decay is standard.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 11: WHAT ARE EMBEDDINGS ============== -->
@@ -796,6 +892,18 @@
       </div>
     </div>
   </div>
+  <aside class="notes">
+    Embeddings are one of the most elegant ideas in ML. We convert words into dense numerical vectors — arrays of floating-point numbers.
+    The key insight is that similar concepts end up close together in this vector space.
+    "cat" and "dog" are both pets, animals — so their vectors are very close. Similarity score: 0.95.
+    "cat" and "car" have nothing in common semantically — their vectors are far apart. Similarity: 0.12.
+    The famous example: "king" minus "man" plus "woman" approximately equals "queen." The embedding space captures semantic relationships as geometric operations.
+    On the right, you can see three clusters in 2D space: Animals (cat, dog, fish) cluster together in blue,
+    Vehicles (car, truck, bike) cluster in pink, and Food (pizza, pasta) clusters in green.
+    Real embeddings aren't 2D — they're typically 768 to 4096 dimensions. But the clustering principle is the same.
+    Models like OpenAI's text-embedding-ada-002 or sentence-transformers convert any text into these vectors.
+    This is the bridge between human language and mathematical computation that makes vector search possible.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 12: VECTOR DATABASES ============== -->
@@ -845,6 +953,16 @@
       <text x="685" y="136" text-anchor="middle" fill="#888" font-size="8">cosine / euclidean distance</text>
     </svg>
   </div>
+  <aside class="notes">
+    A vector database is a specialized database designed for storing, indexing, and searching embedding vectors.
+    The pipeline flows left to right: Start with documents — PDFs, web pages, any text. These go through an embedding model
+    which converts each document (or chunk of a document) into a vector. Those vectors are stored in the vector database with special indexes.
+    When a user makes a query, it's also converted to a vector, and we search for the most similar stored vectors.
+    The key technique is Approximate Nearest Neighbor (ANN) search — we don't check every vector (that would be O(n)).
+    Instead, indexing algorithms like HNSW or IVF allow us to find the top-K most similar vectors in milliseconds, even across millions of documents.
+    Distance metrics include cosine similarity (most common for text), euclidean distance, and dot product.
+    This is the backbone of RAG — the retrieved vectors correspond to the most relevant document chunks for answering a user's question.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 13: CHROMA vs PINECONE ============== -->
@@ -900,6 +1018,17 @@
     <span class="tag tag-blue">Start with Chroma for learning</span>
     <span class="tag tag-green">Graduate to Pinecone for production</span>
   </div>
+  <aside class="notes">
+    Let's compare the two most popular vector databases. Chroma is open-source and self-hosted.
+    You install it with pip install chromadb and run it locally. It's perfect for prototyping and learning — no account needed, no API keys.
+    It can handle millions of vectors on a single machine, stores data in-memory or on local disk, and has full metadata filtering.
+    Pinecone is a managed cloud service. You sign up, get an API key, and everything runs in their cloud.
+    It scales to BILLIONS of vectors across distributed infrastructure. You don't manage servers, indexes, or sharding — Pinecone handles it.
+    For learning and development, start with Chroma. It's free, runs locally, and gives you instant feedback.
+    When you need production reliability, multi-region availability, and massive scale, graduate to Pinecone.
+    Both support the same core operations: insert vectors, query by similarity, filter by metadata.
+    The free tier of Pinecone is generous enough for small projects. Beyond that, it's pay-as-you-go.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 14: CODE EXAMPLES ============== -->
@@ -951,6 +1080,18 @@
       </div>
     </div>
   </div>
+  <aside class="notes">
+    Here's the actual code for both. On the left, Chroma — notice how simple it is.
+    Create a client, create a collection (like a table), add documents with IDs, and query with natural language.
+    Chroma automatically handles embedding — it uses a default embedding model if you don't specify one.
+    The query returns the most similar documents ranked by relevance.
+    On the right, Pinecone requires an API key and explicit index creation.
+    You upsert vectors with metadata — note you need to pre-compute the embeddings yourself (or use their inference API).
+    Querying takes a vector and returns the top-K nearest matches with scores.
+    The key difference: Chroma can embed text for you automatically. Pinecone expects you to provide vectors directly,
+    giving you more control over which embedding model to use.
+    Both support metadata filtering — you can say "find similar documents, but only in the 'healthcare' category."
+  </aside>
 </section>
 
 <!-- ============== SLIDE 15: WHAT IS RAG ============== -->
@@ -999,6 +1140,18 @@
       </div>
     </div>
   </div>
+  <aside class="notes">
+    RAG — Retrieval-Augmented Generation — solves two fundamental problems with LLMs.
+    First, knowledge cutoff: GPT-4 was trained on data up to a certain date. It doesn't know about yesterday's news.
+    Second, hallucination: LLMs can confidently generate plausible-sounding but completely wrong information.
+    The left panel shows WITHOUT RAG: user asks about the refund policy, the LLM guesses "30 days" — wrong!
+    It's making up an answer because it was never trained on your company's specific data.
+    The right panel shows WITH RAG: the system first retrieves the actual policy document from your vector database,
+    includes it in the prompt as context, and the LLM answers accurately: "Per policy #42, it's 60 days."
+    The four key advantages: reduces hallucination by grounding in real data, always up-to-date without retraining,
+    domain-specific to YOUR data, and you can cite sources for trust and verification.
+    RAG is cheaper and faster than fine-tuning for most use cases. You don't need to retrain the model — just update your document store.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 16: RAG PIPELINE ============== -->
@@ -1097,6 +1250,19 @@
       <path d="M390,90 Q410,90 425,130 Q435,160 455,200" fill="none" stroke="#43E97B" stroke-width="1.5" stroke-dasharray="5 3" class="flow-line"/>
     </svg>
   </div>
+  <aside class="notes">
+    This diagram shows the complete RAG pipeline. There are two phases:
+    INGESTION (offline, done once): Load your documents — PDFs, web pages, databases. Split them into chunks of about 500 tokens each
+    with some overlap so context isn't lost at boundaries. Run each chunk through an embedding model to get vectors.
+    Store those vectors in a vector database with an index for fast search.
+    RETRIEVAL + GENERATION (online, per query): When a user asks a question, embed their query using the same model.
+    Search the vector database for the top 3-5 most similar chunks. These are the "retrieved context."
+    Assemble a prompt that includes both the user's question AND the retrieved chunks as context.
+    Send this augmented prompt to the LLM. The LLM generates an answer grounded in the provided context.
+    The dotted line connecting ingestion to retrieval represents the vector database — it's the bridge between the two phases.
+    Key design decisions: chunk size (too big = noise, too small = lost context), overlap amount, number of chunks to retrieve (K),
+    and which embedding model to use. We'll cover chunking strategies in detail later.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 17: LANGCHAIN ============== -->
@@ -1129,6 +1295,18 @@
       <p>LLMs that can use tools, search the web, run code, and make decisions</p>
     </div>
   </div>
+  <aside class="notes">
+    LangChain is the most popular framework for building LLM-powered applications. Think of it as the "glue" layer.
+    MODELS: A unified interface to every major LLM provider. Switch from OpenAI to Anthropic to a local model with one line change.
+    PROMPTS: Template system for dynamic prompts. Instead of hardcoding prompts, use variables: "Answer this {question} using {context}."
+    CHAINS: The core abstraction. Compose multiple steps into a pipeline. For example: format prompt → call LLM → parse output → call another LLM.
+    Chains can be simple (one LLM call) or complex (multi-step reasoning with branching logic).
+    MEMORY: Maintain conversation history. Buffer memory keeps the last N messages. Summary memory compresses old messages.
+    Vector memory stores conversation in a vector DB for long-term recall.
+    RETRIEVERS: Connect to any vector store — Chroma, Pinecone, FAISS, Weaviate. Handles the retrieval step of RAG.
+    AGENTS: The most powerful feature. An agent is an LLM that can USE TOOLS — search the web, run Python code, query a database.
+    It decides which tool to use and in what order based on the user's request. This is how you build truly autonomous AI applications.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 18: LANGCHAIN + RAG CODE ============== -->
@@ -1159,6 +1337,19 @@
     result = qa_chain.<span class="func">invoke</span>(<span class="string">"What is our vacation policy?"</span>)<br>
     <span class="func">print</span>(result[<span class="string">"result"</span>])
   </div>
+  <aside class="notes">
+    Let's walk through a complete RAG implementation in LangChain — this is production-ready code.
+    Step 1: Load documents. PyPDFLoader reads a PDF and extracts text. LangChain has loaders for 100+ formats — web pages, CSVs, databases, Google Docs.
+    Step 2: Chunk the documents. RecursiveCharacterTextSplitter splits on paragraph breaks, then sentences, then words.
+    chunk_size=500 means roughly 500 characters per chunk. chunk_overlap=50 means adjacent chunks share 50 characters to preserve context.
+    Step 3: Create embeddings and store in Chroma. OpenAIEmbeddings uses text-embedding-ada-002 (1536 dimensions).
+    Chroma.from_documents handles both embedding and storage in one call.
+    Step 4: Build the RAG chain. ChatOpenAI with GPT-4 and temperature=0 for deterministic, factual answers.
+    RetrievalQA.from_chain_type creates a chain that: embeds the query → searches Chroma for top 3 chunks → builds a prompt with context → calls GPT-4.
+    return_source_documents=True lets you see which chunks were used — critical for debugging and citation.
+    Step 5: Ask questions! The chain handles everything — embedding, retrieval, prompt construction, and generation.
+    This is a complete, working RAG system in about 15 lines of code. That's the power of LangChain.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 19: PARAMETER TRAINING DEEP DIVE ============== -->
@@ -1254,6 +1445,19 @@
       <text x="660" y="283" fill="#888" font-size="9">Loss &asymp; 0.0001</text>
     </svg>
   </div>
+  <aside class="notes">
+    Let's trace EXACTLY how a single weight gets updated. This is the most important slide for understanding training.
+    STEP 1 — INITIALIZE: We start with a random weight w=0.5. Our input is 0.8. Output = input times weight = 0.8 times 0.5 = 0.40.
+    But the expected output is 0.70. We're off by 0.30.
+    STEP 2 — COMPUTE LOSS: We use Mean Squared Error: (predicted - actual) squared = (0.40 - 0.70) squared = 0.09.
+    Now we need the gradient — the derivative of loss with respect to our weight.
+    Using the chain rule: dLoss/dw = 2(pred - actual) times input = 2(0.4 - 0.7) times 0.8 = -0.48.
+    The gradient is NEGATIVE, which means: increasing the weight will DECREASE the loss. That's the direction we want!
+    STEP 3 — UPDATE: Apply the update rule. w_new = w - learning_rate times gradient = 0.5 - 0.1 times (-0.48) = 0.5 + 0.048 = 0.548.
+    New output: 0.8 times 0.548 = 0.438. Closer to 0.70 than before!
+    STEP 4 — REPEAT: Over 100 iterations, the weight converges to approximately 0.875. At that point, 0.8 times 0.875 = 0.70 — exactly right!
+    Now imagine doing this for 175 BILLION weights simultaneously. That's LLM training.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 20: BATCH & EPOCH VISUALIZATION ============== -->
@@ -1311,6 +1515,17 @@
       </text>
     </svg>
   </div>
+  <aside class="notes">
+    Three critical training concepts:
+    BATCH SIZE: We don't update parameters after every single example — that would be too noisy.
+    Instead, we process a batch of examples (e.g., 32), compute the average gradient across the batch, then update once.
+    Larger batches give more stable gradients but use more memory. Typical sizes: 16, 32, 64, 128. For LLMs, effective batch sizes can be thousands through gradient accumulation.
+    EPOCH: One complete pass through the entire training dataset. If you have 1 million examples and batch size 32,
+    that's 31,250 gradient updates per epoch. LLMs typically train for just 1-3 epochs — they see each piece of text only a few times.
+    This is different from older models that trained for hundreds of epochs. LLM datasets are so large that even one pass takes months.
+    ITERATION/STEP: One batch processed, one gradient update. GPT-3 was trained for approximately 300 billion tokens worth of steps.
+    The math at the bottom: Steps per Epoch = Dataset Size divided by Batch Size. Simple, but understanding this helps you estimate training time and cost.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 21: LLM TRAINING AT SCALE ============== -->
@@ -1354,6 +1569,19 @@
       </div>
     </div>
   </div>
+  <aside class="notes">
+    The scale of LLM training is staggering. GPT-4 reportedly cost over 100 million dollars to train.
+    That buys you 25,000 A100 or H100 GPUs running 24/7 for 3-6 months. The electricity bill alone is millions.
+    LLaMA 2 was trained on 13 trillion tokens — roughly the entire public internet crawled multiple times.
+    Training happens in three phases: PRE-TRAINING is the most expensive — learning language from raw internet text.
+    This is where the model learns grammar, facts, reasoning, coding — everything. It's unsupervised, just predicting the next token.
+    FINE-TUNING adapts the model to specific tasks using curated, high-quality data. Much cheaper, maybe thousands of dollars.
+    RLHF — Reinforcement Learning from Human Feedback — aligns the model with human preferences. Human raters rank model outputs,
+    a reward model is trained on those rankings, and the LLM is fine-tuned to maximize the reward.
+    Key optimization tricks: Adam optimizer gives adaptive per-parameter learning rates. Mixed precision (FP16/BF16) doubles throughput.
+    Gradient checkpointing trades compute for memory — recompute activations instead of storing them.
+    Model parallelism splits the model across multiple GPUs since no single GPU can hold 175 billion parameters.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 22: TOKENIZATION (BPE) ============== -->
@@ -1410,6 +1638,18 @@
       <text x="575" y="280" fill="#aaa" font-size="9">LLaMA 2: ~32,000 tokens</text>
     </svg>
   </div>
+  <aside class="notes">
+    Before any processing, text must be converted to numbers. Tokenization splits text into subword units called tokens.
+    BPE — Byte Pair Encoding — is the most common algorithm. It works bottom-up:
+    Step 1: Start with individual characters. Step 2: Count every pair of adjacent characters in the training corpus.
+    Merge the most frequent pair into a new token. Repeat this 50,000 times (or whatever your vocabulary size is).
+    Common words like "the" become single tokens. Rare words get split: "unhappiness" becomes "Un" + "happiness" or "Un" + "happ" + "iness".
+    This is genius because: common words are efficient (1 token), rare words are still representable (split into subwords),
+    and even completely new words can be tokenized (split into characters if needed).
+    After tokenization, each token maps to an integer ID from the vocabulary. "The" might be token 791, "cat" might be 4344.
+    GPT-4 has about 100,000 tokens in its vocabulary. LLaMA 2 uses about 32,000. Larger vocabularies mean more efficient encoding but bigger embedding matrices.
+    Fun fact: tokenization explains why LLMs sometimes struggle with counting letters or doing character-level tasks — they don't see individual characters!
+  </aside>
 </section>
 
 <!-- ============== SLIDE 23: ATTENTION WITH NUMBERS ============== -->
@@ -1502,6 +1742,18 @@
       <text x="520" y="310" fill="#43E97B" font-size="9" font-weight="600">This is how context is captured!</text>
     </svg>
   </div>
+  <aside class="notes">
+    Let's compute self-attention step by step with real numbers for "The cat sat".
+    Step 1 — Each token has an embedding vector. "The" = [1.0, 0.5, 0.2, 0.8]. These get multiplied by learned weight matrices W_Q, W_K, W_V to produce Query, Key, and Value vectors.
+    Step 2 — For the token "cat", its Query vector Q_cat = [0.8, 0.3, 0.5, 0.2]. We compute dot products with every Key:
+    Q_cat dot K_the = 0.48 + 0.12 + 0.05 + 0.14 = 0.79. Similarly, Q_cat dot K_cat = 1.05, Q_cat dot K_sat = 0.89.
+    Step 3 — Scale by dividing by sqrt(d_k) = sqrt(4) = 2, giving [0.40, 0.53, 0.45]. Apply softmax: [0.30, 0.38, 0.32].
+    "cat" attends most to itself (0.38), then to "sat" (0.32), then to "The" (0.30). This makes sense — "cat" is most relevant to its own meaning.
+    Step 4 — Multiply attention weights by Value vectors and sum: output = 0.30*V_the + 0.38*V_cat + 0.32*V_sat.
+    The result is a context-aware representation of "cat" that incorporates information from all other tokens.
+    The attention heatmap at the bottom shows this for all tokens. Notice "sat" pays most attention to "cat" (who sat?) and itself.
+    This is how transformers understand that in "The cat sat on the mat", "sat" refers to the cat, not the mat.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 24: POSITIONAL ENCODING ============== -->
@@ -1566,6 +1818,19 @@
       </div>
     </div>
   </div>
+  <aside class="notes">
+    Transformers process all tokens in parallel — unlike RNNs, they have no built-in sense of order.
+    "Dog bites man" and "Man bites dog" would produce the same attention scores without positional encoding!
+    The solution: add a position signal to each token's embedding. Token Embedding captures WHAT the word means.
+    Position Encoding captures WHERE it appears. We simply add them together element-wise.
+    The original Transformer used sinusoidal encoding — fixed mathematical formulas using sine and cosine at different frequencies.
+    PE(pos, 2i) = sin(pos / 10000^(2i/d)). Each dimension uses a different frequency, creating a unique "fingerprint" for each position.
+    The beauty: the model can learn to compute relative positions from these encodings because sin(a+b) can be decomposed into terms involving sin(a) and sin(b).
+    Modern models use learned positional embeddings — a trainable embedding matrix just like token embeddings, but indexed by position instead of token ID.
+    The latest innovation is RoPE — Rotary Position Embedding — used in LLaMA, Mistral, and most modern models.
+    RoPE rotates the query and key vectors by position-dependent angles. The dot product Q·K naturally depends on relative position (m-n), not absolute position.
+    This means the model generalizes better to sequence lengths it wasn't trained on.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 25: ACTIVATION FUNCTIONS ============== -->
@@ -1625,6 +1890,19 @@
       <text x="570" y="275" fill="#888" font-size="9">Used in: LLaMA, PaLM, Mistral</text>
     </svg>
   </div>
+  <aside class="notes">
+    Without activation functions, stacking 100 layers of matrix multiplications collapses into a single linear transformation.
+    You could replace the entire network with one matrix — no depth, no power. Activations introduce non-linearity, letting networks learn complex patterns.
+    ReLU — the simplest: if x is positive, pass it through. If negative, output zero. Very fast to compute, creates sparse activations.
+    The problem: "dying ReLU" — if a neuron's output becomes negative during training, it outputs zero, gets zero gradient, and can never recover.
+    GELU — Gaussian Error Linear Unit — the default in GPT and BERT. It's smooth everywhere (unlike ReLU's sharp corner at zero).
+    Mathematically: x times the cumulative distribution function of the standard normal. For large x, it's approximately x. For very negative x, approximately 0.
+    The smooth transition means better gradient flow — no dead neurons. This leads to faster, more stable training.
+    SiLU/Swish — used in LLaMA, PaLM, and Mistral. Defined as x times sigmoid(x). It's non-monotonic — it can go slightly below zero.
+    This "self-gating" property (the sigmoid gates the linear part) gives it extra expressiveness.
+    The choice of activation function might seem minor, but switching from ReLU to GELU improved BERT's performance measurably.
+    For modern LLMs, GELU and SiLU are the standards. You'll rarely see plain ReLU in a transformer anymore.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 26: LOSS FUNCTIONS ============== -->
@@ -1690,6 +1968,20 @@
       </div>
     </div>
   </div>
+  <aside class="notes">
+    Cross-entropy loss is how we measure LLM performance during training. Here's the intuition:
+    The model outputs a probability distribution over its entire vocabulary — say 100,000 tokens.
+    We know the true next token is "cat" at index 5. Cross-entropy loss is simply: negative log of the probability assigned to the correct token.
+    If the model assigns 70% probability to "cat": loss = -log(0.7) = 0.357. That's pretty good!
+    If the model only assigns 1% to "cat": loss = -log(0.01) = 4.605. Very high — the model was confident in the WRONG answer.
+    The -log(p) curve on the right shows this beautifully. When probability is near 1 (model is correct and confident), loss approaches 0.
+    When probability is near 0 (model completely wrong), loss shoots up toward infinity.
+    This creates a strong gradient signal: being very wrong is MUCH more penalized than being slightly wrong.
+    The property that makes cross-entropy ideal for classification: it penalizes confident mistakes severely.
+    A model that says "I'm 99% sure it's 'dog'" when it's actually "cat" gets a much higher loss than one that hedges with "50% dog, 40% cat."
+    Total training loss is the average cross-entropy across all tokens in the training batch.
+    Perplexity, the standard LLM metric, is just 2^(average cross-entropy loss). Lower perplexity = better model.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 27: OPTIMIZERS DEEP DIVE ============== -->
@@ -1762,6 +2054,21 @@
       <text x="575" y="297" fill="#888" font-size="9">Used in GPT, LLaMA, Mistral</text>
     </svg>
   </div>
+  <aside class="notes">
+    Optimizers determine HOW we update parameters using gradients. This is a critical choice.
+    SGD — the original. Simple update: w = w minus learning_rate times gradient. Every parameter gets the same learning rate.
+    The contour plot shows SGD zigzagging toward the minimum — it oscillates because the gradient direction isn't always aligned with the minimum.
+    SGD works but converges slowly, especially when the loss landscape has different curvatures in different directions.
+    ADAM — Adaptive Moment Estimation — the game-changer. It maintains two running averages per parameter:
+    m (momentum) — exponential moving average of gradients. This smooths out noise and accelerates in consistent directions.
+    v (velocity) — exponential moving average of squared gradients. This adapts the learning rate per parameter.
+    Parameters with consistently large gradients get smaller effective learning rates. Parameters with small gradients get larger ones.
+    The contour plot shows Adam taking a smooth, direct path to the minimum — much more efficient than SGD.
+    Beta1=0.9 means momentum averages over roughly the last 10 steps. Beta2=0.999 means velocity averages over the last 1000 steps.
+    ADAMW adds decoupled weight decay — it shrinks weights toward zero independently of the gradient-based update.
+    This is proper L2 regularization (unlike Adam's built-in weight decay which is coupled with the adaptive learning rate).
+    AdamW is THE standard optimizer for LLM training — used by GPT, LLaMA, Mistral, and virtually every modern model.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 28: WEIGHT INITIALIZATION ============== -->
@@ -1830,6 +2137,21 @@
       <text x="722" y="255" text-anchor="middle" fill="#FFD93D" font-size="9" font-weight="600">LLaMA, Mistral</text>
     </svg>
   </div>
+  <aside class="notes">
+    How you initialize weights before training begins has a huge impact on whether training succeeds at all.
+    ALL ZEROS: Never do this! If all weights are the same, all neurons compute the same thing, get the same gradients, and update identically.
+    The network can never break this symmetry — it's like having one giant neuron instead of millions. Completely useless.
+    XAVIER/GLOROT: Named after Xavier Glorot. Weights are drawn from a normal distribution with variance 2/(n_in + n_out).
+    This keeps the variance of activations stable across layers — signals don't explode or vanish as they propagate.
+    Designed for sigmoid and tanh activations. Used in BERT and older models.
+    HE/KAIMING: Named after Kaiming He. Variance is 2/n_in — larger than Xavier because ReLU kills half the activations (outputs 0 for negative inputs).
+    The higher variance compensates for this. Standard for networks using ReLU activations.
+    GPT-STYLE: Very small standard deviation (0.02) combined with careful scaling of residual connections.
+    Each residual path is scaled by 1/sqrt(N) where N is the number of layers. This prevents the residual sum from growing unboundedly.
+    GPT-2 introduced this, and it's used in GPT-3/4, LLaMA, and Mistral.
+    The bell curves visualize the distribution of initial weights — notice how they differ in spread (variance).
+    Getting initialization wrong can mean the difference between training succeeding in 3 months versus never converging at all.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 29: REGULARIZATION ============== -->
@@ -1921,6 +2243,20 @@
       <text x="440" y="276" fill="#ccc" font-size="9">&bull; <strong style="fill:#43E97B">Data Augmentation</strong> &mdash; more diverse training data</text>
     </svg>
   </div>
+  <aside class="notes">
+    Regularization prevents overfitting — when the model memorizes training data instead of learning generalizable patterns.
+    DROPOUT is elegantly simple: during each forward pass, randomly "turn off" neurons with probability p (typically 10-30%).
+    In the left diagram, crossed-out neurons are disabled — their outputs are set to zero. Only the remaining neurons process data.
+    Each forward pass uses a DIFFERENT random subset of neurons. This forces the network to be redundant — no single neuron can be a single point of failure.
+    It's like training an ensemble of thousands of slightly different networks and averaging their predictions.
+    At inference time, ALL neurons are active, but weights are scaled by (1-p) to compensate for the fact that more neurons are active.
+    WEIGHT DECAY adds a penalty to the loss function proportional to the sum of squared weights: L_total = L_task + lambda times sum(w^2).
+    Large weights get penalized more. This pushes weights toward smaller values, creating smoother, more generalizable functions.
+    The bar chart comparison shows it clearly: without decay, weights are large and varied (overfitting risk). With decay, weights are small and uniform.
+    In LLMs, we also use: LAYER NORMALIZATION (normalize activations to zero mean, unit variance per layer — stabilizes training),
+    LABEL SMOOTHING (soften training targets from hard 0/1 to soft 0.1/0.9 — prevents overconfidence),
+    and massive DATA DIVERSITY — training on the entire internet is itself a form of regularization.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 30: HNSW VECTOR INDEXING ============== -->
@@ -2002,6 +2338,22 @@
       </div>
     </div>
   </div>
+  <aside class="notes">
+    When you have millions of vectors, brute-force search (comparing your query to EVERY vector) is O(n) — too slow for real-time applications.
+    HNSW — Hierarchical Navigable Small World — is the most popular ANN (Approximate Nearest Neighbor) algorithm.
+    Imagine a multi-level highway system. The TOP layer has very few nodes connected by long-distance "highway" links.
+    The MIDDLE layer has more nodes with medium-distance connections. The BOTTOM layer has ALL vectors with dense local connections.
+    Search process: Start at the top layer. Greedily walk toward the query vector — each step, move to the neighbor closest to the query.
+    When you can't improve anymore at this layer, DROP to the next layer and continue with finer-grained connections.
+    At the bottom layer, you find the true nearest neighbors with high precision.
+    This gives O(log N) search time — searching 10 million vectors takes roughly the same number of steps as searching 1 million.
+    The red dashed path in the diagram shows this: start at query on the top layer, jump to a nearby highway node,
+    drop to the middle layer for refinement, then drop to the bottom for the final answer.
+    Both Chroma and Pinecone use HNSW or similar algorithms under the hood. Pinecone also uses IVF (Inverted File Index)
+    which partitions the vector space into cells and only searches relevant cells.
+    The tradeoff: ANN search is approximate — it might miss the true nearest neighbor occasionally.
+    But in practice, recall rates are 95-99%, and the speed improvement is 100-1000x. Worth the tradeoff!
+  </aside>
 </section>
 
 <!-- ============== SLIDE 31: CHUNKING STRATEGIES ============== -->
@@ -2070,6 +2422,23 @@
       <text x="565" y="265" fill="#888" font-size="9" font-weight="600">Best for: mixed-topic documents</text>
     </svg>
   </div>
+  <aside class="notes">
+    How you split documents for RAG is one of the most impactful design decisions. Get it wrong and retrieval quality suffers.
+    FIXED-SIZE CHUNKS: The simplest approach. Split every 500 tokens with 50-token overlap.
+    The overlap (shown in yellow) ensures that sentences at chunk boundaries aren't lost.
+    Problem: you might split mid-sentence or mid-paragraph, losing context. A chunk might start with "...which means that" — incomplete without the previous chunk.
+    Best for uniform documents where content density is consistent.
+    RECURSIVE SPLITTING: LangChain's recommended approach. It tries to split on the most meaningful boundary first.
+    First tries double newlines (paragraph breaks). If a paragraph is too long, falls back to single newlines.
+    Still too long? Falls back to periods (sentences). Last resort: spaces (words).
+    This respects document structure — paragraphs stay intact when possible. Sentences are never split mid-word.
+    This is the default in LangChain's RecursiveCharacterTextSplitter and works well for most text.
+    SEMANTIC CHUNKING: The most sophisticated approach. Uses an embedding model to detect topic changes.
+    Compute embedding similarity between consecutive sentences. When similarity drops below a threshold, start a new chunk.
+    Each chunk is topically coherent — all sentences discuss the same concept.
+    More compute-intensive (requires running an embedding model during chunking), but produces the highest-quality chunks.
+    My recommendation: start with recursive splitting at 500 tokens with 50-token overlap. Optimize from there.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 32: FINE-TUNING METHODS ============== -->
@@ -2159,6 +2528,20 @@
       <text x="655" y="288" fill="#6C63FF" font-size="9" font-weight="600">Used by ChatGPT, Claude</text>
     </svg>
   </div>
+  <aside class="notes">
+    You almost never train an LLM from scratch — that costs millions. Instead, you ADAPT a pre-trained model to your specific needs.
+    FULL FINE-TUNING: Update ALL parameters. Best performance, but requires enormous resources — 8+ A100 GPUs, 350GB+ memory for a 175B model.
+    Risk of catastrophic forgetting: the model might lose its general knowledge while learning your specific task.
+    LoRA — Low-Rank Adaptation — is a breakthrough from 2021. Instead of updating the entire weight matrix W (say, 4096x4096 = 16M parameters),
+    you freeze W and add two tiny matrices: A (4096x8) and B (8x4096). Only 65K parameters instead of 16M — that's 250x fewer!
+    The key insight: the change needed to adapt a pre-trained model has LOW RANK — it can be captured by small matrices.
+    The green bars on the right of each frozen layer represent these tiny adapter matrices.
+    LoRA achieves 95-99% of full fine-tuning performance at 0.1% of the parameter cost. You can fine-tune on a single consumer GPU.
+    QLoRA goes further — quantize the frozen model from 16-bit to 4-bit (4x compression), then apply LoRA.
+    You can fine-tune a 70 BILLION parameter model on a single 24GB GPU! Cost: $1-$10 instead of $10K+.
+    RLHF is different — it's about alignment, not task adaptation. Train a reward model from human preference rankings,
+    then use PPO (Proximal Policy Optimization) to train the LLM to maximize that reward. This is what makes ChatGPT helpful and safe.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 33: INFERENCE & SAMPLING ============== -->
@@ -2242,6 +2625,21 @@
       <text x="575" y="290" fill="#ccc" font-size="9">Code gen: T=0.0 (greedy)</text>
     </svg>
   </div>
+  <aside class="notes">
+    After training, how does an LLM actually generate text? It predicts one token at a time, using sampling strategies.
+    TEMPERATURE controls the "sharpness" of the probability distribution. The model outputs raw logits, and we compute: p_i = softmax(logit_i / T).
+    T=0.1 (deterministic): The distribution becomes very peaked. "the" gets 89%, everything else is negligible. The model always picks the most likely token. Great for factual tasks.
+    T=1.0 (balanced): The original distribution. "the" 45%, "a" 25%, "this" 15%. There's meaningful probability on several tokens. Good for general conversation.
+    T=2.0 (creative): The distribution flattens. Even unlikely tokens get significant probability. You might get unusual, creative word choices — or nonsense.
+    TOP-K SAMPLING: Instead of sampling from the entire vocabulary, only consider the K most likely tokens.
+    With K=3, we restrict to "the" (35%), "a" (20%), "this" (15%). Renormalize these to sum to 1: "the" 50%, "a" 29%, "this" 21%.
+    This prevents the model from ever sampling extremely unlikely tokens (like "purple" after "The cat sat on the").
+    TOP-P (NUCLEUS) SAMPLING: More adaptive than Top-K. Include tokens until their cumulative probability reaches P.
+    With P=0.8: include "the" (35%, cumulative 35%), "a" (20%, cumulative 55%), "this" (15%, cumulative 70%), "an" (8%, cumulative 78%) — stop at 4 tokens.
+    The beauty: when the model is confident, nucleus sampling uses few tokens. When uncertain, it uses many. It adapts automatically.
+    ChatGPT uses T=0.7 by default. Code generation uses T=0 (greedy — always pick the most likely token). Creative writing might use T=1.0+.
+    In practice, Top-P=0.95 with a moderate temperature gives the best results for most applications.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 34: PUTTING IT ALL TOGETHER ============== -->
@@ -2312,6 +2710,19 @@
       <text x="690" y="198" text-anchor="middle" fill="#888" font-size="8">No hallucination</text>
     </svg>
   </div>
+  <aside class="notes">
+    Here's the complete architecture — how all the pieces fit together.
+    YOUR DATA: The raw material. PDFs, databases, APIs, web pages — any knowledge your organization has.
+    LANGCHAIN: The orchestration layer. Document loaders ingest data from any source. Text splitters chunk it intelligently.
+    Chains and agents compose multi-step workflows. Prompt templates dynamically construct LLM inputs. Memory maintains conversation state.
+    EMBEDDINGS + VECTOR DB: The knowledge layer. OpenAI's text-embedding-ada-002 (or open-source alternatives) converts text to 1536-dimensional vectors.
+    Chroma or Pinecone stores and indexes these vectors for millisecond similarity search.
+    LLM WITH RAG: The intelligence layer. GPT-4, Claude, or LLaMA — a model with 175B+ trained parameters.
+    It receives the user's question PLUS the most relevant document chunks retrieved from the vector database.
+    The result: accurate answers grounded in your actual data, with source citations and no hallucination.
+    This architecture is what powers modern AI applications — customer support bots, enterprise search, document Q&A, code assistants, and more.
+    The green box at the bottom represents the goal: accurate, cited answers that your users can trust.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 23: KEY TAKEAWAYS ============== -->
@@ -2337,6 +2748,16 @@
       <p><strong style="color:#FF6584;">LangChain</strong> ties it all together into production-ready AI applications</p>
     </div>
   </div>
+  <aside class="notes">
+    Let's recap the key takeaways from this presentation:
+    LLMs are transformer-based models. The attention mechanism is the key innovation — it lets every token attend to every other token, capturing context.
+    Parameters are the learned weights and biases — billions of numbers that encode language understanding. They're trained through the forward pass, loss computation, backpropagation, and gradient descent loop, repeated billions of times with optimizers like AdamW.
+    Embeddings convert text into vectors where meaning becomes geometry. Similar concepts are close, different concepts are far. This is the bridge between language and math.
+    Vector databases like Chroma (for development) and Pinecone (for production) store and search these vectors at scale using algorithms like HNSW.
+    RAG — Retrieval-Augmented Generation — grounds LLM responses in real data. Retrieve relevant documents, include them as context, generate accurate answers.
+    LangChain ties everything together into a framework for building production AI applications.
+    The field is moving incredibly fast. New models, techniques, and tools emerge weekly. But these fundamentals — transformers, attention, embeddings, vector search, RAG — will remain the foundation for years to come.
+  </aside>
 </section>
 
 <!-- ============== SLIDE 24: THANK YOU ============== -->
@@ -2351,13 +2772,20 @@
     <span class="tag tag-pink" style="font-size:0.8em;">RAG</span>
     <span class="tag tag-green" style="font-size:0.8em;">LangChain</span>
   </div>
-  <p style="margin-top:40px; color:#555; font-size:0.7em;">Use arrow keys or swipe to navigate &bull; Press ESC for overview</p>
+  <p style="margin-top:40px; color:#555; font-size:0.7em;">Use arrow keys or swipe to navigate &bull; Press S for speaker notes &bull; Press ESC for overview</p>
+  <aside class="notes">
+    Thank you for your attention! Remember: press S to open Speaker View with these notes.
+    For hands-on practice: start by building a simple RAG system with LangChain and Chroma using the code from slide 18.
+    Next steps: experiment with different chunking strategies, try different embedding models, and explore LangChain agents.
+    Questions are welcome!
+  </aside>
 </section>
 
 </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
 <script>
 Reveal.initialize({
   hash: true,
@@ -2372,6 +2800,7 @@ Reveal.initialize({
   controls: true,
   progress: true,
   history: true,
+  plugins: [ RevealNotes ],
 });
 </script>
 </body>
